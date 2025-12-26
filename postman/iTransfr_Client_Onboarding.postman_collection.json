@@ -1,0 +1,520 @@
+{
+  "info": {
+    "name": "iTransfr Client Onboarding APIs",
+    "description": "Complete client onboarding flow with step-by-step APIs for admin and public access",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "admin-user"
+  },
+  "item": [
+    {
+      "name": "Admin Client Creation APIs",
+      "item": [
+        {
+          "name": "Step 1: Account Type Selection",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "admin_session_token=YOUR_ADMIN_SESSION_TOKEN",
+                "description": "Get this from admin login response"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountType\": \"business\",\n  \"sessionId\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/client/step-1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "client", "step-1"]
+            },
+            "description": "Create new onboarding session and select account type"
+          },
+          "response": []
+        },
+        {
+          "name": "Step 2: Business Information",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "admin_session_token=YOUR_ADMIN_SESSION_TOKEN"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"{{session_id}}\",\n  \"country\": \"US\",\n  \"entityType\": \"llc\",\n  \"businessName\": \"Example Corp LLC\",\n  \"taxId\": \"12-3456789\",\n  \"state\": \"CA\",\n  \"address\": {\n    \"country\": \"US\",\n    \"streetAddress\": \"123 Main St\",\n    \"addressLine2\": \"Suite 100\",\n    \"city\": \"San Francisco\",\n    \"state\": \"CA\",\n    \"postalCode\": \"94105\"\n  },\n  \"website\": \"https://example.com\",\n  \"phone\": \"+14155551234\",\n  \"phoneCountryCode\": \"US\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/client/step-2",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "client", "step-2"]
+            },
+            "description": "Save business information (country, entity type, address, etc.)"
+          },
+          "response": []
+        },
+        {
+          "name": "Step 3: Business Details",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "admin_session_token=YOUR_ADMIN_SESSION_TOKEN"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"{{session_id}}\",\n  \"industry\": \"Technology\",\n  \"businessDescription\": \"We provide software solutions for financial services.\",\n  \"expectedMonthlyVolume\": \"$50,000 - $100,000\",\n  \"primaryUseCase\": \"Cross-border payments and currency exchange\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/client/step-3",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "client", "step-3"]
+            },
+            "description": "Save business details (industry, description, volume, use case)"
+          },
+          "response": []
+        },
+        {
+          "name": "Step 4: Volume & Operations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "admin_session_token=YOUR_ADMIN_SESSION_TOKEN"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"{{session_id}}\",\n  \"volumeSwiftMonthly\": 50000.00,\n  \"volumeLocalMonthly\": 25000.00,\n  \"volumeCryptoMonthly\": 10000.00,\n  \"volumeInternationalTxCount\": 150,\n  \"volumeLocalTxCount\": 300,\n  \"operatingCurrencies\": [\"USD\", \"EUR\", \"MXN\"],\n  \"primaryOperatingRegions\": [\"North America\", \"Europe\", \"Latin America\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/client/step-4",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "client", "step-4"]
+            },
+            "description": "Save business operations data (volumes, currencies, regions)"
+          },
+          "response": []
+        },
+        {
+          "name": "Step 5: Owners & Representatives",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "admin_session_token=YOUR_ADMIN_SESSION_TOKEN"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"{{session_id}}\",\n  \"owners\": [\n    {\n      \"type\": \"person\",\n      \"firstName\": \"John\",\n      \"lastName\": \"Smith\",\n      \"email\": \"john.smith@example.com\",\n      \"phone\": \"+14155551234\",\n      \"phoneCountryCode\": \"US\",\n      \"dateOfBirth\": \"1980-05-15\",\n      \"citizenship\": \"US\",\n      \"role\": \"director\",\n      \"ownershipPercentage\": 75,\n      \"isAuthorizedSigner\": true,\n      \"residentialCountry\": \"US\",\n      \"residentialAddress\": \"456 Oak Ave\",\n      \"residentialCity\": \"Los Angeles\",\n      \"residentialState\": \"CA\",\n      \"residentialPostalCode\": \"90210\",\n      \"idType\": \"passport\",\n      \"idNumber\": \"P123456789\",\n      \"idIssuingCountry\": \"US\",\n      \"idIssueDate\": \"2015-03-10\",\n      \"idExpirationDate\": \"2025-03-10\",\n      \"employmentStatus\": \"employed\",\n      \"employmentIndustry\": \"Technology\",\n      \"occupation\": \"CEO\",\n      \"employerName\": \"Example Corp\"\n    },\n    {\n      \"type\": \"person\",\n      \"firstName\": \"Jane\",\n      \"lastName\": \"Doe\",\n      \"email\": \"jane.doe@example.com\",\n      \"phone\": \"+14155555678\",\n      \"phoneCountryCode\": \"US\",\n      \"dateOfBirth\": \"1985-08-20\",\n      \"citizenship\": \"US\",\n      \"role\": \"shareholder\",\n      \"ownershipPercentage\": 25,\n      \"isAuthorizedSigner\": false,\n      \"residentialCountry\": \"US\",\n      \"residentialAddress\": \"789 Pine St\",\n      \"residentialCity\": \"San Francisco\",\n      \"residentialState\": \"CA\",\n      \"residentialPostalCode\": \"94102\",\n      \"idType\": \"drivers_license\",\n      \"idNumber\": \"D987654321\",\n      \"idIssuingCountry\": \"US\",\n      \"idIssueDate\": \"2018-01-15\",\n      \"idExpirationDate\": \"2024-01-15\",\n      \"employmentStatus\": \"employed\",\n      \"employmentIndustry\": \"Finance\",\n      \"occupation\": \"CFO\",\n      \"employerName\": \"Example Corp\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/client/step-5",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "client", "step-5"]
+            },
+            "description": "Save beneficial owners and representatives (must total 100% ownership)"
+          },
+          "response": []
+        },
+        {
+          "name": "Step 6: PEP & Sanctions Screening",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "admin_session_token=YOUR_ADMIN_SESSION_TOKEN"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"{{session_id}}\",\n  \"pepScreening\": {\n    \"isPEPSeniorOfficial\": false,\n    \"isPEPPoliticalParty\": false,\n    \"isPEPFamilyMember\": false,\n    \"isPEPCloseAssociate\": false,\n    \"additionalNotes\": \"\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/client/step-6",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "client", "step-6"]
+            },
+            "description": "Complete PEP and sanctions screening for all beneficial owners"
+          },
+          "response": []
+        },
+        {
+          "name": "Step 7: Document Upload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "admin_session_token=YOUR_ADMIN_SESSION_TOKEN"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"{{session_id}}\",\n  \"documents\": [\n    {\n      \"type\": \"formationDocument\",\n      \"fileName\": \"articles_of_organization.pdf\",\n      \"fileUrl\": \"https://example.com/files/articles_of_organization.pdf\",\n      \"fileSize\": 245760,\n      \"mimeType\": \"application/pdf\"\n    },\n    {\n      \"type\": \"proofOfRegistration\",\n      \"fileName\": \"business_license.pdf\",\n      \"fileUrl\": \"https://example.com/files/business_license.pdf\",\n      \"fileSize\": 189440,\n      \"mimeType\": \"application/pdf\"\n    },\n    {\n      \"type\": \"passport\",\n      \"fileName\": \"john_smith_passport.pdf\",\n      \"fileUrl\": \"https://example.com/files/john_smith_passport.pdf\",\n      \"fileSize\": 345680,\n      \"mimeType\": \"application/pdf\",\n      \"ownerId\": \"owner_1\"\n    },\n    {\n      \"type\": \"driversLicenseFront\",\n      \"fileName\": \"jane_doe_license.jpg\",\n      \"fileUrl\": \"https://example.com/files/jane_doe_license.jpg\",\n      \"fileSize\": 125680,\n      \"mimeType\": \"image/jpeg\",\n      \"ownerId\": \"owner_2\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/client/step-7",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "client", "step-7"]
+            },
+            "description": "Save document information (use file upload API to upload actual files)"
+          },
+          "response": []
+        },
+        {
+          "name": "Step 8: Final Submission",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "admin_session_token=YOUR_ADMIN_SESSION_TOKEN"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"{{session_id}}\",\n  \"confirmAccuracy\": true,\n  \"agreeToTerms\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/client/step-8",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "client", "step-8"]
+            },
+            "description": "Final client creation - creates all database records and submits to AMLBot"
+          },
+          "response": []
+        },
+        {
+          "name": "File Upload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "admin_session_token=YOUR_ADMIN_SESSION_TOKEN"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "documentType",
+                  "value": "passport",
+                  "type": "text"
+                },
+                {
+                  "key": "sessionId",
+                  "value": "{{session_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "ownerId",
+                  "value": "owner_1",
+                  "type": "text",
+                  "description": "Optional - for owner-specific documents"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/client/upload",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "client", "upload"]
+            },
+            "description": "Upload files to S3 and get URLs for document storage"
+          },
+          "response": []
+        },
+        {
+          "name": "Share Form",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "admin_session_token=YOUR_ADMIN_SESSION_TOKEN",
+                "description": "Use the session_token from login response"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ADMIN_SESSION_TOKEN",
+                "description": "Alternative: Use Bearer token"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"{{session_id}}\",\n  \"ownerIndex\": 0,\n  \"recipientEmail\": \"owner@example.com\",\n  \"recipientName\": \"John Smith\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/client/share",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "client", "share"]
+            },
+            "description": "Generate shareable form link for external owner completion (48-hour expiry)"
+          },
+          "response": []
+        },
+        {
+          "name": "File Upload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "admin_session_token=YOUR_ADMIN_SESSION_TOKEN",
+                "description": "Use the session_token from login response"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ADMIN_SESSION_TOKEN",
+                "description": "Alternative: Use Bearer token"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select a PDF or image file"
+                },
+                {
+                  "key": "documentType",
+                  "value": "passport",
+                  "type": "text",
+                  "description": "Document type: passport, driversLicenseFront, idCard, etc."
+                },
+                {
+                  "key": "sessionId",
+                  "value": "{{session_id}}",
+                  "type": "text",
+                  "description": "Session ID from step responses"
+                },
+                {
+                  "key": "ownerId",
+                  "value": "",
+                  "type": "text",
+                  "description": "Optional: Owner ID for owner-specific documents"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/client/upload",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "client", "upload"]
+            },
+            "description": "Upload files to S3 and get URLs for document storage"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Session Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "admin_session_token=YOUR_ADMIN_SESSION_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/client/step-1?sessionId={{session_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "client", "step-1"],
+              "query": [
+                {
+                  "key": "sessionId",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Get current session data and progress (works for all steps)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Public Shared Form APIs",
+      "item": [
+        {
+          "name": "Get Shared Form Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/shared-form/{{share_token}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shared-form", "{{share_token}}"]
+            },
+            "description": "Get shared form data for external owner completion (no authentication required)"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Shared Form Updates",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"updatedOwnerData\": {\n    \"firstName\": \"John\",\n    \"lastName\": \"Smith\",\n    \"email\": \"john.smith@example.com\",\n    \"phone\": \"+14155551234\",\n    \"dateOfBirth\": \"1980-05-15\",\n    \"residentialAddress\": \"456 Updated St\",\n    \"residentialCity\": \"Los Angeles\",\n    \"residentialState\": \"CA\",\n    \"residentialPostalCode\": \"90210\",\n    \"idType\": \"passport\",\n    \"idNumber\": \"P123456789\",\n    \"idIssuingCountry\": \"US\",\n    \"idIssueDate\": \"2015-03-10\",\n    \"idExpirationDate\": \"2025-03-10\",\n    \"employmentStatus\": \"employed\",\n    \"occupation\": \"CEO\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/shared-form/{{share_token}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shared-form", "{{share_token}}"]
+            },
+            "description": "Submit updated owner information from shared form link"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Authentication",
+      "item": [
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"SecurePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "auth", "login"]
+            },
+            "description": "Login as admin to get session token for client creation APIs"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "session_id",
+      "value": "",
+      "type": "string",
+      "description": "Auto-set from Step 1 response - used for all subsequent steps"
+    },
+    {
+      "key": "share_token",
+      "value": "",
+      "type": "string",
+      "description": "Auto-set from Share Form response - used for shared form APIs"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string",
+      "description": "Set from Admin Login response - used as Bearer token alternative"
+    }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set admin_token from Login response",
+          "if (pm.response.code === 200 && pm.request.url.path.includes('auth/login')) {",
+          "    const response = pm.response.json();",
+          "    if (response.success && response.session_token) {",
+          "        pm.collectionVariables.set('admin_token', response.session_token);",
+          "        console.log('Admin token set:', response.session_token);",
+          "    }",
+          "}",
+          "",
+          "// Set session_id from Step 1 response",
+          "if (pm.response.code === 200 && pm.request.url.path.includes('step-1')) {",
+          "    const response = pm.response.json();",
+          "    if (response.success && response.sessionId) {",
+          "        pm.collectionVariables.set('session_id', response.sessionId);",
+          "        console.log('Session ID set:', response.sessionId);",
+          "    }",
+          "}",
+          "",
+          "// Set share_token from Share Form response",
+          "if (pm.response.code === 200 && pm.request.url.path.includes('share') && !pm.request.url.path.includes('shared-form')) {",
+          "    const response = pm.response.json();",
+          "    if (response.success && response.shareToken) {",
+          "        pm.collectionVariables.set('share_token', response.shareToken);",
+          "        console.log('Share token set:', response.shareToken);",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ]
+}

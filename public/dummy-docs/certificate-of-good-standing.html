@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate of Good Standing</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 40px;
+            background: #fffef5;
+            border: 3px double #8b7355;
+        }
+        .seal {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .seal-icon {
+            font-size: 60px;
+        }
+        .state-name {
+            font-size: 24px;
+            letter-spacing: 4px;
+            color: #1a3a5c;
+            margin: 10px 0;
+            text-transform: uppercase;
+        }
+        .department {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #1a3a5c;
+            letter-spacing: 2px;
+            margin: 20px 0;
+            border-top: 2px solid #8b7355;
+            border-bottom: 2px solid #8b7355;
+            padding: 15px 0;
+        }
+        .body-text {
+            line-height: 2;
+            font-size: 16px;
+            text-align: justify;
+            margin: 30px 0;
+        }
+        .company-name {
+            font-weight: bold;
+            font-size: 18px;
+            color: #1a3a5c;
+        }
+        .details {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9f7f0;
+            border: 1px solid #d4c4a8;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dotted #ccc;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .signature-section {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature-box {
+            text-align: center;
+            width: 45%;
+        }
+        .signature-line {
+            border-top: 1px solid #333;
+            margin-top: 50px;
+            padding-top: 5px;
+            font-size: 12px;
+        }
+        .certificate-number {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #666;
+        }
+        .sample-watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 80px;
+            color: rgba(0,0,0,0.05);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="sample-watermark">SAMPLE</div>
+
+    <div class="seal">
+        <div class="seal-icon">⚖️</div>
+        <div class="state-name">State of Delaware</div>
+        <div class="department">Office of the Secretary of State</div>
+    </div>
+
+    <div class="title">CERTIFICATE OF GOOD STANDING</div>
+
+    <div class="body-text">
+        I, the Secretary of State of the State of Delaware, do hereby certify that
+        <span class="company-name">ACME TECHNOLOGIES INC.</span> is a corporation duly
+        organized and existing under and by virtue of the laws of the State of Delaware,
+        and is in good standing and has legal existence so far as the records of this
+        office show, as of the date of this certificate.
+    </div>
+
+    <div class="details">
+        <div class="detail-row">
+            <span>Entity Name:</span>
+            <strong>ACME Technologies Inc.</strong>
+        </div>
+        <div class="detail-row">
+            <span>File Number:</span>
+            <strong>5123456</strong>
+        </div>
+        <div class="detail-row">
+            <span>Date of Formation:</span>
+            <strong>January 15, 2020</strong>
+        </div>
+        <div class="detail-row">
+            <span>Entity Type:</span>
+            <strong>Corporation</strong>
+        </div>
+        <div class="detail-row">
+            <span>Status:</span>
+            <strong style="color: green;">Good Standing</strong>
+        </div>
+    </div>
+
+    <div class="signature-section">
+        <div class="signature-box">
+            <div class="signature-line">Secretary of State</div>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line">Date: December 26, 2024</div>
+        </div>
+    </div>
+
+    <div class="certificate-number">
+        Certificate Number: CGS-2024-123456789
+    </div>
+
+    <p style="margin-top: 30px; font-size: 11px; color: #666; text-align: center;">
+        This is a sample document for testing purposes only.
+    </p>
+</body>
+</html>

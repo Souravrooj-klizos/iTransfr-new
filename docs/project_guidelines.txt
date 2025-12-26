@@ -1,0 +1,138 @@
+iTransfr – 15-DAY HACKATHON BUILD PLAN
+(For a team of 5 developers working in parallel)
+STRUCTURE: 5 Dev Pods
+Pod A – Frontend (Client Portal)
+2 devs
+ Next.js + Tailwind + Supabase Auth
+Pod B – Admin Console
+1 dev
+Pod C – Integrations
+1 dev
+ Bitso, Infinitus, AMLBot, Turnkey
+Pod D – Backend + Ledger
+1 dev
+ Database, status engine, transaction pipeline
+DAY 0 – PREP (½ day)
+Set up repos
+Set up design theme
+Create DB schema draft
+Align all pods on folder structure and API contracts
+Everyone must be aligned on the status engine BEFORE day 1.
+DAYS 1–3: PARALLEL SPRINT
+Pod A – Client Portal UI (looks real, no backend yet)
+Deliver:
+Dashboard UI
+Transaction list UI
+Wallet page
+KYC upload UI
+Branding + layout
+Goal: By Day 3, platform LOOKS 70% done.
+ Clients should already feel “wow.”
+Pod B – Admin Console (UI only)
+Deliver:
+Login for admin
+KYC review page
+Transaction table
+Simple action buttons (Approve / Mark Received / Execute Swap / Send Payout)
+Goal: Skeleton admin system done.
+Pod C – Integrations
+Implement stubs + test calls:
+AMLBot basic call
+Bitso: get quote
+Bitso: execute order
+Turnkey: create wallet
+Infinitus: initiate payout
+Goal: All integrations callable from a simple script by Day 3.
+Pod D – Backend + Ledger
+Build core tables:
+users
+wallets
+transactions
+ledger entries
+kyc_status
+fx_orders
+payout_requests
+Implement:
+Basic REST endpoints
+Status engine (simple enum transitions)
+DAYS 4–7: CONNECT EVERYTHING
+Pod A – Hook UI to backend
+Pull balance
+Display transactions
+Show status updates
+Connect KYC upload to API
+Connect wallet page to Turnkey wallet value
+Pod B – Admin Console Integration
+Admin should be able to:
+Approve KYC
+Mark funds received
+Trigger swaps
+Trigger payouts
+Update status
+Pod C – Wire Integrations to backend pipeline
+Funding → status moves automatically once admin clicks
+Swap → Bitso call + update ledger
+Payout → Infinitus call + update status
+Pod D – Status Engine Logic
+Status transitions implemented across flows:
+Deposit
+Swap
+Payout
+Shadow ledger updated with every step.
+Goal by Day 7:
+ The platform is now a functional “manual automation” system.
+DAYS 8–10: MVP POLISH
+Client Portal polish:
+Real-time polling (5 seconds)
+Animated status indicators
+Proper error messages
+Add funds / swap / payout forms
+Admin Console polish:
+Workflow buttons
+Notes field
+Audit log basics
+Backend:
+Ensure idempotency for integrations
+Add basic validation
+Add rate storage for FX
+Goal:
+ From the client perspective, it looks like a true remittance system.
+DAYS 11–12: PDF RECEIPTS + EMAILS
+Add a simple template for:
+Deposit confirmation PDF
+Swap execution PDF
+Payout confirmation PDF
+Trigger email sends using SendGrid or Resend.
+Goal:
+ Clients receive professional receipts → confidence skyrockets.
+DAYS 13–14: UAT + FIXES
+Test KYC → deposit → swap → payout flow end-to-end
+Fix edge cases
+Add minimal analytics
+Validate integration callbacks
+Goal:
+ Everything works reliably ONCE THROUGH the happy path.
+DAY 15: LAUNCH PREP
+Deliver:
+Demo video
+Walkthrough script
+Staging environment for clients
+Production deploy
+Credentials for Admin Console
+Onboarding guide PDF
+Goal:
+ Platform is ready to show to clients + investors + partners.
+WHAT THIS 15-DAY BUILD PRODUCES
+You will have:
+A clean, enterprise-looking fintech portal
+A working onboarding flow
+Real wallet creation
+Real swaps via Bitso
+Real payouts via Infinitus
+Real AML checks
+A manual-but-perfectly-fine admin backend
+A database tracking all money flows and FX events
+Status-based movement that makes the platform feel fully automated
+PDF receipts + emails that make it feel mature
+A system ready to onboard select early clients
+This is exactly how Airwallex, Brex, and Mercury did their first 2 months.

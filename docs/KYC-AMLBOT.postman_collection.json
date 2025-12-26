@@ -1,0 +1,781 @@
+{
+	"info": {
+		"_postman_id": "aa129f81-aa3b-4ceb-81ed-567d27ef24c4",
+		"name": "KYC-AMLBOT",
+		"description": "# AMLBot KYC API Collection\n\nThis collection contains all the API endpoints for integrating with AMLBot's KYC (Know Your Customer) and AML (Anti-Money Laundering) verification services.\n\n## API Flow\n\nThe typical KYC verification flow is:\n\n1. **Create Applicant** - Register the person/company in AMLBot\n2. **Upload Files** - Upload document images (passport, ID, etc.)\n3. **Create Documents** - Link uploaded files to document types\n4. **Create Verification** - Start the verification process\n\n## Authentication\n\nAll requests require the `Authorization` header with a Token:\n```\nAuthorization: Token YOUR_API_KEY\n```\n\n## Base URL\n\n- Production: `https://kyc-api.amlbot.com`\n\n## Response Format\n\nAll responses are in JSON format.\n\n## Rate Limits\n\nRefer to AMLBot documentation for current rate limits.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24836203"
+	},
+	"item": [
+		{
+			"name": "Applicants",
+			"description": "Manage applicants (persons or companies) for KYC verification.",
+			"item": [
+				{
+					"name": "Create Applicant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"PERSON\",\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"dob\": \"1970-10-25\",\n    \"residence_country\": \"GB\",\n    \"nationality\": \"GB\",\n    \"email\": \"john.doe@mail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/applicants",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"applicants"
+							]
+						},
+						"description": "Create a new applicant for KYC verification.\n\n**Required Fields:**\n- `type`: \"PERSON\" or \"COMPANY\"\n\n**Optional Fields for PERSON:**\n- `first_name`: First name\n- `last_name`: Last name\n- `dob`: Date of birth (YYYY-MM-DD)\n- `residence_country`: ISO 3166-1 alpha-2 country code\n- `nationality`: ISO 3166-1 alpha-2 country code\n- `email`: Email address\n- `phone`: Phone number (E.164 format)\n\n**Response:**\n```json\n{\n    \"applicant_id\": \"abc123...\"\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Applicant",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"PERSON\",\n    \"first_name\": \"Peter\",\n    \"last_name\": \"Doe\",\n    \"dob\": \"1970-10-25\",\n    \"residence_country\": \"GB\",\n    \"nationality\": \"GB\",\n    \"email\": \"john.doe@mail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/applicants/{{APPLICANT_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"applicants",
+								"{{APPLICANT_ID}}"
+							]
+						},
+						"description": "Update an existing applicant's information.\n\n**URL Parameters:**\n- `applicant_id`: The ID of the applicant to update\n\n**Body:** Same fields as Create Applicant (only include fields to update)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Applicant",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/applicants/{{APPLICANT_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"applicants",
+								"{{APPLICANT_ID}}"
+							]
+						},
+						"description": "Retrieve an applicant's details by ID.\n\n**URL Parameters:**\n- `applicant_id`: The ID of the applicant\n\n**Response:** Full applicant object with all details"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Files",
+			"description": "Upload and manage files (document images) for verification.",
+			"item": [
+				{
+					"name": "Upload File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "",
+									"description": "The document image file (PNG, JPG, PDF supported)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/files",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"files"
+							]
+						},
+						"description": "Upload a document image file to AMLBot.\n\n**Important:** This must be done BEFORE creating a document record.\n\n**Supported Formats:**\n- Images: PNG, JPG, JPEG\n- Documents: PDF\n\n**Response:**\n```json\n{\n    \"file_id\": \"f15124cd1219b2403f2a9813fee26ef7e67b\"\n}\n```\n\nSave the `file_id` to use when creating documents."
+					},
+					"response": []
+				},
+				{
+					"name": "Update File",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "",
+									"description": "The new document image file"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/files/{{FILE_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"files",
+								"{{FILE_ID}}"
+							]
+						},
+						"description": "Replace an existing file with a new one.\n\n**URL Parameters:**\n- `file_id`: The ID of the file to replace"
+					},
+					"response": []
+				},
+				{
+					"name": "Get File",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/files/{{FILE_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"files",
+								"{{FILE_ID}}"
+							]
+						},
+						"description": "Get information about an uploaded file.\n\n**URL Parameters:**\n- `file_id`: The ID of the file"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete File",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/files/{{FILE_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"files",
+								"{{FILE_ID}}"
+							]
+						},
+						"description": "Delete an uploaded file.\n\n**URL Parameters:**\n- `file_id`: The ID of the file to delete\n\n**Note:** Files attached to documents cannot be deleted."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Documents",
+			"description": "Create and manage document records that link uploaded files to document types.",
+			"item": [
+				{
+					"name": "Create Document",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"applicant_id\": \"{{APPLICANT_ID}}\",\n    \"type\": \"PASSPORT\",\n    \"document_number\": \"2367823468\",\n    \"issue_date\": \"2010-10-25\",\n    \"expiry_date\": \"2030-07-10\",\n    \"front_side_id\": \"{{FRONT_FILE_ID}}\",\n    \"back_side_id\": \"{{BACK_FILE_ID}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/documents",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"documents"
+							]
+						},
+						"description": "Create a document record linking uploaded files to a document type.\n\n**IMPORTANT:** You must upload files first and get their `file_id` values.\n\n**Required Fields:**\n- `applicant_id`: The applicant this document belongs to\n- `type`: Document type (see below)\n- `front_side_id`: File ID of the front side image\n\n**Optional Fields:**\n- `back_side_id`: File ID of the back side image (for 2-sided docs)\n- `document_number`: Document number\n- `issue_date`: Issue date (YYYY-MM-DD)\n- `expiry_date`: Expiry date (YYYY-MM-DD)\n\n**Document Types:**\n- `PASSPORT` - Passport\n- `GOVERNMENT_ID` - National ID card\n- `DRIVERS_LICENSE` - Driver's license\n- `SELFIE` - Selfie photo\n- `FINANCIAL_DOCUMENT` - Bank statement, tax doc, etc.\n- `OTHER` - Other documents\n\n**Note:** Only ONE document per type is allowed per applicant.\n\n**Response:**\n```json\n{\n    \"document_id\": \"9614d5071d7bb24e702a00f30ae3fb39602d\"\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Document",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"PASSPORT\",\n    \"document_number\": \"2367823468\",\n    \"issue_date\": \"2010-10-25\",\n    \"expiry_date\": \"2030-07-10\",\n    \"front_side_id\": \"{{FRONT_FILE_ID}}\",\n    \"back_side_id\": \"{{BACK_FILE_ID}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/documents/{{DOCUMENT_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"documents",
+								"{{DOCUMENT_ID}}"
+							]
+						},
+						"description": "Update an existing document record.\n\n**URL Parameters:**\n- `document_id`: The ID of the document to update"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Document",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/documents/{{DOCUMENT_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"documents",
+								"{{DOCUMENT_ID}}"
+							]
+						},
+						"description": "Get details of a document record.\n\n**URL Parameters:**\n- `document_id`: The ID of the document"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Document",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/documents/{{DOCUMENT_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"documents",
+								"{{DOCUMENT_ID}}"
+							]
+						},
+						"description": "Delete a document record.\n\n**URL Parameters:**\n- `document_id`: The ID of the document to delete\n\n**Note:** Documents attached to verifications cannot be deleted."
+					},
+					"response": []
+				},
+				{
+					"name": "List Applicant Documents",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/applicants/{{APPLICANT_ID}}/documents",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"applicants",
+								"{{APPLICANT_ID}}",
+								"documents"
+							]
+						},
+						"description": "List all documents for an applicant.\n\n**URL Parameters:**\n- `applicant_id`: The ID of the applicant"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Verifications",
+			"description": "Create and manage verification requests.",
+			"item": [
+				{
+					"name": "Create Verification (Without Form)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"applicant_id\": \"{{APPLICANT_ID}}\",\n    \"types\": [\"DOCUMENT\"],\n    \"callback_url\": \"https://your-site.com/api/webhooks/amlbot\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/verifications",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"verifications"
+							]
+						},
+						"description": "Create a verification request for an applicant WITHOUT using a form.\n\n**IMPORTANT:** Documents must be uploaded and created BEFORE calling this.\n\n**Required Fields:**\n- `applicant_id`: The applicant to verify\n- `types`: Array of verification types\n\n**Optional Fields:**\n- `callback_url`: Webhook URL for verification results\n\n**Verification Types:**\n- `DOCUMENT` - ID document verification\n- `AML` - AML/sanctions screening (requires FINANCIAL_DOCUMENT)\n- `SELFIE` - Selfie liveness check\n- `LIVENESS` - Advanced liveness detection\n\n**Response:**\n```json\n{\n    \"verification_id\": \"abc123...\",\n    \"status\": \"pending\"\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Verification (With Form)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"applicant_id\": \"{{APPLICANT_ID}}\",\n    \"types\": [\"DOCUMENT\", \"AML\"],\n    \"form_id\": \"{{FORM_ID}}\",\n    \"callback_url\": \"https://your-site.com/api/webhooks/amlbot\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/verifications",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"verifications"
+							]
+						},
+						"description": "Create a verification request using a pre-configured form.\n\n**When to use:**\n- When you want users to upload documents through AMLBot's UI\n- When you need specific document requirements defined in a form\n\n**Required Fields:**\n- `applicant_id`: The applicant to verify\n- `types`: Array of verification types\n- `form_id`: ID of the form to use (get from /forms endpoint)\n\n**Note:** If using form_id, the form must exist in your AMLBot account."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Verification",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/verifications/{{VERIFICATION_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"verifications",
+								"{{VERIFICATION_ID}}"
+							]
+						},
+						"description": "Get the status and results of a verification.\n\n**URL Parameters:**\n- `verification_id`: The ID of the verification\n\n**Response includes:**\n- `status`: pending, in_progress, completed, failed\n- `result`: approved, declined, review_needed\n- `risk_score`: Numerical risk score"
+					},
+					"response": []
+				},
+				{
+					"name": "List Applicant Verifications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/verifications?applicant_id={{APPLICANT_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"query": [
+								{
+									"key": "applicant_id",
+									"value": "{{APPLICANT_ID}}"
+								}
+							],
+							"path": [
+								"verifications"
+							]
+						},
+						"description": "List all verifications for an applicant.\n\n**Query Parameters:**\n- `applicant_id`: The ID of the applicant"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Forms",
+			"description": "Manage KYC forms and generate form URLs for users.",
+			"item": [
+				{
+					"name": "List Forms",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/forms",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"forms"
+							]
+						},
+						"description": "List all available forms in your AMLBot account.\n\n**Response:**\n```json\n{\n    \"items\": [\n        {\n            \"form_id\": \"abc123...\",\n            \"name\": \"Standard KYC\",\n            \"status\": \"active\"\n        }\n    ]\n}\n```\n\nForms are configured in the AMLBot dashboard and define what documents are required for verification."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Form URL",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"applicant_id\": \"{{APPLICANT_ID}}\",\n    \"redirect_url\": \"https://your-site.com/kyc/success\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/forms/{{FORM_ID}}/urls",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"forms",
+								"{{FORM_ID}}",
+								"urls"
+							]
+						},
+						"description": "Generate a URL for users to complete KYC through AMLBot's hosted form.\n\n**Use this when:**\n- You want users to upload documents through AMLBot's UI\n- You don't want to handle document uploads yourself\n\n**Required Fields:**\n- `applicant_id`: The applicant who will complete the form\n\n**Optional Fields:**\n- `redirect_url`: URL to redirect user after completion\n- `external_applicant_id`: Your internal user ID\n\n**Response:**\n```json\n{\n    \"form_url\": \"https://kyc.amlbot.com/...\",\n    \"verification_id\": \"abc123...\",\n    \"expires_at\": \"2024-01-01T00:00:00Z\"\n}\n```\n\nSend the `form_url` to your user to complete KYC."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Webhooks",
+			"description": "Webhook handling for verification results.",
+			"item": [
+				{
+					"name": "Webhook Payload Example (Reference)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-AMLBot-Signature",
+								"value": "sha256=...",
+								"type": "text",
+								"description": "HMAC signature for verification"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"event\": \"verification.completed\",\n    \"data\": {\n        \"verification_id\": \"abc123...\",\n        \"applicant_id\": \"def456...\",\n        \"status\": \"completed\",\n        \"result\": \"approved\",\n        \"risk_score\": 15,\n        \"completed_at\": \"2024-01-01T12:00:00Z\"\n    },\n    \"timestamp\": \"2024-01-01T12:00:00Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://your-site.com/api/webhooks/amlbot",
+							"protocol": "https",
+							"host": [
+								"your-site",
+								"com"
+							],
+							"path": [
+								"api",
+								"webhooks",
+								"amlbot"
+							]
+						},
+						"description": "**This is a REFERENCE for the webhook payload AMLBot sends.**\n\nThis is NOT an API you call - this is what AMLBot sends to YOUR callback_url.\n\n**Events:**\n- `verification.completed` - Verification finished\n- `verification.failed` - Verification failed\n- `verification.updated` - Verification status changed\n\n**Result Values:**\n- `approved` - Passed verification\n- `declined` - Failed verification\n- `review_needed` - Manual review required\n\n**Signature Verification:**\nThe `X-AMLBot-Signature` header contains an HMAC-SHA256 signature that you should verify against your webhook secret."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Testing",
+			"description": "Endpoints for testing your integration.",
+			"item": [
+				{
+					"name": "Test Connection (iTransfr)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{ITRANSFR_URL}}/api/kyc/amlbot-test",
+							"host": [
+								"{{ITRANSFR_URL}}"
+							],
+							"path": [
+								"api",
+								"kyc",
+								"amlbot-test"
+							]
+						},
+						"description": "Test the connection to AMLBot from your iTransfr backend.\n\n**Response:**\n```json\n{\n    \"success\": true,\n    \"message\": \"AMLBot API connection successful\",\n    \"apiKeyConfigured\": true\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "List Forms (iTransfr)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{ITRANSFR_URL}}/api/kyc/amlbot-forms",
+							"host": [
+								"{{ITRANSFR_URL}}"
+							],
+							"path": [
+								"api",
+								"kyc",
+								"amlbot-forms"
+							]
+						},
+						"description": "List available AMLBot forms through the iTransfr API."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "https://kyc-api.amlbot.com",
+			"description": "AMLBot API base URL"
+		},
+		{
+			"key": "AUTH_TOKEN",
+			"value": "Token YOUR_API_KEY_HERE",
+			"description": "Your AMLBot API token (format: Token xxxxx)"
+		},
+		{
+			"key": "APPLICANT_ID",
+			"value": "",
+			"description": "Current applicant ID (set after creating)"
+		},
+		{
+			"key": "FILE_ID",
+			"value": "",
+			"description": "Current file ID (set after uploading)"
+		},
+		{
+			"key": "FRONT_FILE_ID",
+			"value": "",
+			"description": "Front side file ID"
+		},
+		{
+			"key": "BACK_FILE_ID",
+			"value": "",
+			"description": "Back side file ID (optional)"
+		},
+		{
+			"key": "DOCUMENT_ID",
+			"value": "",
+			"description": "Current document ID"
+		},
+		{
+			"key": "VERIFICATION_ID",
+			"value": "",
+			"description": "Current verification ID"
+		},
+		{
+			"key": "FORM_ID",
+			"value": "",
+			"description": "Form ID from your AMLBot account"
+		},
+		{
+			"key": "ITRANSFR_URL",
+			"value": "http://localhost:3000",
+			"description": "Your iTransfr application URL"
+		}
+	]
+}

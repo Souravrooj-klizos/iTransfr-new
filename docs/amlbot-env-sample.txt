@@ -1,0 +1,24 @@
+# AMLBot KYC Integration
+# ========================
+#
+# REQUIRED: Set your AMLBot API key
+# Get this from your AMLBot dashboard: https://dashboard.amlbot.com
+AML_BOT_API_KEY=your_api_key_here
+
+# REQUIRED: Set the default form ID for verifications
+# The form_id is REQUIRED by AMLBot API to create verifications
+# Get this from: GET https://kyc-api.amlbot.com/forms
+#
+# Available forms in your account:
+# - 7b6ea16b17e0a14f791aa1f9fe5d2812dcf1 (Business Client Onboard V2)
+# - dc18215806c9854b310a6fe7b0b67e954c95 (Basic KYC)
+# - 3a1c660102a125422409b4a7069373dedc84 (Advanced KYC)
+# - db70c13407f8e548380b6687148f0cfcd4fc (Pro KYC)
+# - 6b002a3108aa75411c0ad737a0b6d0b9b526 (KYB)
+# - aa1c2cab099fa548ec0ab5f791a1be3fd2f8 (KYC_iTransfr)
+AMLBOT_FORM_ID=7b6ea16b17e0a14f791aa1f9fe5d2812dcf1
+
+# Optional: Webhook URL for verification results
+# This is where AMLBot will send verification status updates
+# Default: ${NEXT_PUBLIC_APP_URL}/api/webhooks/amlbot
+# AMLBOT_WEBHOOK_URL=https://your-domain.com/api/webhooks/amlbot

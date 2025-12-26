@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax ID Verification - IRS Letter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 750px;
+            margin: 40px auto;
+            padding: 40px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .irs-logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #003366;
+        }
+        .irs-info {
+            text-align: right;
+            font-size: 12px;
+            color: #666;
+        }
+        .dept-info {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .letter-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 30px 0;
+            text-align: center;
+            color: #003366;
+        }
+        .address-block {
+            margin: 30px 0;
+            line-height: 1.6;
+        }
+        .ein-box {
+            background: #f0f7ff;
+            border: 2px solid #003366;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        .ein-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .ein-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #003366;
+            letter-spacing: 3px;
+        }
+        .body-text {
+            line-height: 1.8;
+            margin: 20px 0;
+        }
+        .reference-box {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .ref-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
+        .signature-section {
+            margin-top: 50px;
+        }
+        .signature-line {
+            border-top: 1px solid #333;
+            width: 200px;
+            margin-top: 40px;
+            padding-top: 5px;
+            font-size: 12px;
+        }
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #ccc;
+            font-size: 11px;
+            color: #666;
+        }
+        .sample-watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 80px;
+            color: rgba(0,0,0,0.05);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="sample-watermark">SAMPLE</div>
+
+    <div class="header">
+        <div>
+            <div class="irs-logo">🏛️ Internal Revenue Service</div>
+            <div class="dept-info">Department of the Treasury<br>P.O. Box 9003<br>Holtsville, NY 11742-9003</div>
+        </div>
+        <div class="irs-info">
+            Date: December 26, 2024<br>
+            Letter 147C<br>
+            CP 575 A
+        </div>
+    </div>
+
+    <div class="letter-title">EMPLOYER IDENTIFICATION NUMBER VERIFICATION</div>
+
+    <div class="address-block">
+        <strong>ACME Technologies Inc.</strong><br>
+        123 Business Avenue, Suite 500<br>
+        Wilmington, DE 19801
+    </div>
+
+    <div class="body-text">
+        Dear Taxpayer,
+        <br><br>
+        In response to your request, we are confirming that the following Employer Identification Number (EIN) has been assigned to your organization:
+    </div>
+
+    <div class="ein-box">
+        <div class="ein-label">EMPLOYER IDENTIFICATION NUMBER</div>
+        <div class="ein-number">12-3456789</div>
+    </div>
+
+    <div class="reference-box">
+        <div class="ref-row">
+            <span>Legal Name:</span>
+            <strong>ACME Technologies Inc.</strong>
+        </div>
+        <div class="ref-row">
+            <span>EIN:</span>
+            <strong>12-3456789</strong>
+        </div>
+        <div class="ref-row">
+            <span>Entity Type:</span>
+            <strong>Corporation</strong>
+        </div>
+        <div class="ref-row">
+            <span>Date Assigned:</span>
+            <strong>January 15, 2020</strong>
+        </div>
+        <div class="ref-row">
+            <span>Tax Year End:</span>
+            <strong>December</strong>
+        </div>
+    </div>
+
+    <div class="body-text">
+        This EIN was assigned to your organization for federal tax purposes. Please keep this letter in your permanent records.
+        <br><br>
+        If you have any questions about this letter, you can contact the IRS Business and Specialty Tax Line at 1-800-829-4933.
+    </div>
+
+    <div class="signature-section">
+        <p>Sincerely,</p>
+        <div class="signature-line">
+            IRS Accounts Management
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>This is a sample document for testing purposes only.</p>
+        <p>Letter 147C (Rev. 12-2024) | Catalog Number 14345A</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proof of Ownership - Operating Agreement</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            max-width: 750px;
+            margin: 40px auto;
+            padding: 40px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .title {
+            font-size: 26px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+        .company-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a3a5c;
+            margin: 20px 0;
+        }
+        .section {
+            margin: 30px 0;
+        }
+        .section-title {
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th {
+            background: #f0f0f0;
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+            font-size: 13px;
+        }
+        td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+        .total-row {
+            background: #e8f4e8;
+            font-weight: bold;
+        }
+        .signature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 50px;
+        }
+        .signature-box {
+            border-top: 1px solid #333;
+            padding-top: 10px;
+        }
+        .signature-label {
+            font-size: 12px;
+            color: #666;
+        }
+        .signature-name {
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .article {
+            margin: 20px 0;
+        }
+        .article-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .sample-watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 80px;
+            color: rgba(0,0,0,0.05);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="sample-watermark">SAMPLE</div>
+
+    <div class="header">
+        <div class="title">OPERATING AGREEMENT</div>
+        <div class="subtitle">LIMITED LIABILITY COMPANY</div>
+        <div class="company-name">ACME Technologies LLC</div>
+        <div class="subtitle">A Delaware Limited Liability Company</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Article I - Organization</div>
+        <p>This Operating Agreement ("Agreement") is entered into as of January 15, 2020, by and among the Members listed below, for the purpose of forming a Limited Liability Company under the laws of the State of Delaware.</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Article II - Members and Ownership Interests</div>
+        <p>The following persons are the Members of the Company with the ownership interests and capital contributions indicated:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Member Name</th>
+                    <th>Address</th>
+                    <th>Ownership %</th>
+                    <th>Capital Contribution</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>John Doe</td>
+                    <td>123 Main Street, New York, NY 10001</td>
+                    <td>60%</td>
+                    <td>$60,000.00</td>
+                </tr>
+                <tr>
+                    <td>Jane Smith</td>
+                    <td>456 Oak Avenue, Los Angeles, CA 90001</td>
+                    <td>25%</td>
+                    <td>$25,000.00</td>
+                </tr>
+                <tr>
+                    <td>Robert Johnson</td>
+                    <td>789 Pine Road, Chicago, IL 60601</td>
+                    <td>15%</td>
+                    <td>$15,000.00</td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="2"><strong>TOTAL</strong></td>
+                    <td><strong>100%</strong></td>
+                    <td><strong>$100,000.00</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Article III - Management</div>
+        <p>The Company shall be managed by its Members. John Doe shall serve as the Managing Member and shall have authority to bind the Company in ordinary business matters.</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Article IV - Distributions</div>
+        <p>Net profits and losses of the Company shall be allocated to the Members in proportion to their respective ownership interests.</p>
+    </div>
+
+    <div class="signature-grid">
+        <div class="signature-box">
+            <div class="signature-name">John Doe</div>
+            <div class="signature-label">Managing Member (60%)</div>
+            <div class="signature-label">Date: January 15, 2020</div>
+        </div>
+        <div class="signature-box">
+            <div class="signature-name">Jane Smith</div>
+            <div class="signature-label">Member (25%)</div>
+            <div class="signature-label">Date: January 15, 2020</div>
+        </div>
+        <div class="signature-box">
+            <div class="signature-name">Robert Johnson</div>
+            <div class="signature-label">Member (15%)</div>
+            <div class="signature-label">Date: January 15, 2020</div>
+        </div>
+    </div>
+
+    <p style="margin-top: 50px; font-size: 11px; color: #666; text-align: center;">
+        This is a sample document for testing purposes only.
+    </p>
+</body>
+</html>
