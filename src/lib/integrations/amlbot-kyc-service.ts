@@ -100,7 +100,12 @@ export interface AMLBotVerification {
   verification_id: string;
   applicant_id: string;
   status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'expired';
+  verified?: boolean;
   result?: 'approved' | 'declined' | 'review_needed';
+  verifications?: {
+    profile?: { verified: boolean; comment?: string; decline_reasons?: string[] };
+    document?: { verified: boolean; comment?: string; decline_reasons?: string[] };
+  };
   types: AMLBotVerificationType[];
   form_id?: string;
   callback_url?: string;
@@ -442,7 +447,9 @@ export async function createVerification(
   const formId = data.form_id || process.env.AMLBOT_FORM_ID || process.env.AMLBOT_DEFAULT_FORM_ID;
 
   if (!formId) {
-    throw new Error('AMLBot form_id is required. Set AMLBOT_FORM_ID environment variable or provide form_id.');
+    throw new Error(
+      'AMLBot form_id is required. Set AMLBOT_FORM_ID environment variable or provide form_id.'
+    );
   }
 
   console.log('[AMLBot KYC] Using form_id:', formId);
@@ -518,10 +525,7 @@ export async function getForms(): Promise<AMLBotForm[]> {
  * Get a form URL for user to complete KYC
  * This is an alternative to API-based document upload
  */
-export async function getFormUrl(
-  formId: string,
-  data: GetFormUrlInput
-): Promise<AMLBotFormUrl> {
+export async function getFormUrl(formId: string, data: GetFormUrlInput): Promise<AMLBotFormUrl> {
   console.log('[AMLBot KYC] Getting form URL for form:', formId);
 
   const response = await getClient().post<any>(`/forms/${formId}/urls`, data);
@@ -625,12 +629,12 @@ export async function submitKYC(input: KYCSubmissionInput): Promise<KYCSubmissio
 
       // Priority order: identity docs first, then financial, then other
       const priority: Record<string, number> = {
-        'PASSPORT': 1,
-        'GOVERNMENT_ID': 2,
-        'DRIVERS_LICENSE': 3,
-        'SELFIE': 4,
-        'FINANCIAL_DOCUMENT': 5,
-        'OTHER': 6,
+        PASSPORT: 1,
+        GOVERNMENT_ID: 2,
+        DRIVERS_LICENSE: 3,
+        SELFIE: 4,
+        FINANCIAL_DOCUMENT: 5,
+        OTHER: 6,
       };
 
       return (priority[typeA] || 10) - (priority[typeB] || 10);
@@ -642,7 +646,9 @@ export async function submitKYC(input: KYCSubmissionInput): Promise<KYCSubmissio
       // Check if this document type has already been used
       // AMLBot only allows ONE document per type
       if (usedDocumentTypes.has(amlbotDocType)) {
-        console.log(`[AMLBot KYC] Skipping duplicate document type: ${amlbotDocType} (${group.type})`);
+        console.log(
+          `[AMLBot KYC] Skipping duplicate document type: ${amlbotDocType} (${group.type})`
+        );
         skippedDocuments.push(`${group.type} (duplicate ${amlbotDocType})`);
         continue;
       }
@@ -697,7 +703,9 @@ export async function submitKYC(input: KYCSubmissionInput): Promise<KYCSubmissio
     // Step 4: Create verification (even if some documents failed)
     // Note: form_id is REQUIRED - if not provided in input, will use AMLBOT_FORM_ID env var
     if (documentIds.length === 0) {
-      console.warn('[AMLBot KYC] No documents uploaded successfully, verification may still work if form allows it');
+      console.warn(
+        '[AMLBot KYC] No documents uploaded successfully, verification may still work if form allows it'
+      );
     }
 
     // Don't pass types - let the form configuration determine verification types
@@ -717,7 +725,6 @@ export async function submitKYC(input: KYCSubmissionInput): Promise<KYCSubmissio
       verificationId: verification.verification_id,
       documentIds,
     };
-
   } catch (error: any) {
     console.error('[AMLBot KYC] Submission error:', error);
 
@@ -730,7 +737,6 @@ export async function submitKYC(input: KYCSubmissionInput): Promise<KYCSubmissio
     };
   }
 }
-
 
 /**
  * Alternative: Get a form URL for the user to complete KYC
@@ -765,7 +771,6 @@ export async function getKYCFormUrl(
       formUrl: formUrlResult.form_url,
       documentIds: [],
     };
-
   } catch (error: any) {
     console.error('[AMLBot KYC] Form URL error:', error);
 

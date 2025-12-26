@@ -293,15 +293,6 @@ export interface ClientDetailResponse {
 
 export const adminClientApi = {
   // List Clients (Active & Completed)
-  async listClients(): Promise<any[]> {
-    const response = await adminAxios.get<any[]>('/client/list');
-
-    if (!response.data) {
-      throw new Error('Invalid API response: missing data in list clients');
-    }
-
-    return response.data;
-  },
 
   // Delete Client (with all related data)
   async deleteClient(clientId: string): Promise<{ success: boolean; message: string }> {
@@ -348,19 +339,65 @@ export const adminClientApi = {
   // Get KYC Submission Status for a Client
   async getKYCStatus(clientId: string): Promise<{
     hasKycRecord: boolean;
-    status?: string;
-    amlbotRequestId?: string;
+    status?: string; // Real-time status from AMLBot if available, otherwise local DB
+    amlbotRequestId?: string; // Verification ID
+    amlbotApplicantId?: string; // Applicant ID
     riskScore?: number;
-    notes?: string[];
+    rejectionDetails?: {
+      profile?: { verified: boolean; comment?: string; decline_reasons?: string[] };
+      document?: { verified: boolean; comment?: string; decline_reasons?: string[] };
+    };
     createdAt?: string;
-    updatedAt?: string;
-    message?: string;
+    updatedAt?: string; // Real-time timestamp from AMLBot if available
   }> {
-    const response = await adminAxios.get<any>(`/client/${clientId}/submit-kyc`);
+    const response = await adminAxios.get<{
+      hasKycRecord: boolean;
+      status?: string;
+      amlbotRequestId?: string;
+      amlbotApplicantId?: string;
+      riskScore?: number;
+      rejectionDetails?: {
+        profile?: { verified: boolean; comment?: string; decline_reasons?: string[] };
+        document?: { verified: boolean; comment?: string; decline_reasons?: string[] };
+      };
+      createdAt?: string;
+      updatedAt?: string;
+    }>(`/client/${clientId}/kyc-status`);
 
     if (!response.data) {
       throw new Error('Invalid API response: missing data in get KYC status');
     }
+
+    return response.data;
+  },
+
+  async listClients(params: {
+    search?: string;
+    status?: string;
+    type?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{
+    clients: any[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const queryParams = new URLSearchParams();
+    if (params.search) queryParams.append('search', params.search);
+    if (params.status) queryParams.append('status', params.status);
+    if (params.type) queryParams.append('type', params.type);
+    if (params.page) queryParams.append('page', params.page.toString());
+    if (params.limit) queryParams.append('limit', params.limit.toString());
+
+    const response = await adminAxios.get<{
+      clients: any[];
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    }>(`/client/list?${queryParams.toString()}`);
 
     return response.data;
   },
@@ -626,7 +663,9 @@ export const adminClientApi = {
   // =====================================================
 
   // Documents
-  async getDocuments(clientId: string): Promise<{ success: boolean; documents: any[]; count: number }> {
+  async getDocuments(
+    clientId: string
+  ): Promise<{ success: boolean; documents: any[]; count: number }> {
     const response = await adminAxios.get(`/client/${clientId}/documents`);
     return response.data;
   },
@@ -636,9 +675,12 @@ export const adminClientApi = {
     return response.data;
   },
 
-  async deleteClientDocument(clientId: string, documentId: string): Promise<{ success: boolean; message: string }> {
+  async deleteClientDocument(
+    clientId: string,
+    documentId: string
+  ): Promise<{ success: boolean; message: string }> {
     const response = await adminAxios.delete(`/client/${clientId}/documents`, {
-      data: { documentId }
+      data: { documentId },
     });
     return response.data;
   },
@@ -649,26 +691,40 @@ export const adminClientApi = {
     return response.data;
   },
 
-  async createNote(clientId: string, data: { type: string; content: string }): Promise<{ success: boolean; note: any }> {
+  async createNote(
+    clientId: string,
+    data: { type: string; content: string }
+  ): Promise<{ success: boolean; note: any }> {
     const response = await adminAxios.post(`/client/${clientId}/notes`, data);
     return response.data;
   },
 
-  async deleteNote(clientId: string, noteId: string): Promise<{ success: boolean; message: string }> {
+  async deleteNote(
+    clientId: string,
+    noteId: string
+  ): Promise<{ success: boolean; message: string }> {
     const response = await adminAxios.delete(`/client/${clientId}/notes`, {
-      data: { noteId }
+      data: { noteId },
     });
     return response.data;
   },
 
   // Activity
-  async getActivity(clientId: string, limit = 50, offset = 0): Promise<{ success: boolean; activities: any[]; count: number; total: number }> {
-    const response = await adminAxios.get(`/client/${clientId}/activity?limit=${limit}&offset=${offset}`);
+  async getActivity(
+    clientId: string,
+    limit = 50,
+    offset = 0
+  ): Promise<{ success: boolean; activities: any[]; count: number; total: number }> {
+    const response = await adminAxios.get(
+      `/client/${clientId}/activity?limit=${limit}&offset=${offset}`
+    );
     return response.data;
   },
 
   // Owners
-  async getOwners(clientId: string): Promise<{ success: boolean; owners: BeneficialOwner[]; count: number }> {
+  async getOwners(
+    clientId: string
+  ): Promise<{ success: boolean; owners: BeneficialOwner[]; count: number }> {
     const response = await adminAxios.get(`/client/${clientId}/owners`);
     return response.data;
   },

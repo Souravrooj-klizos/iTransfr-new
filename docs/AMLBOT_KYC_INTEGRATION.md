@@ -76,7 +76,7 @@ src/
 │       │
 │       ├── webhooks/
 │       │   └── amlbot/
-  │       │       └── route.ts             # POST - Webhook receiver
+│       │       └── route.ts             # POST - Webhook receiver
 │       │
 │       └── admin/
 │           └── client/

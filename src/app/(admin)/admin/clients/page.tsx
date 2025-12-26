@@ -7,10 +7,13 @@ import { Modal } from '@/components/ui/Modal';
 import { Select } from '@/components/ui/Select';
 import { OnboardingStepSkeleton } from '@/components/ui/SkeletonLoader';
 import { useToast } from '@/components/ui/Toast';
+import { useDebouncedSearch } from '@/hooks/useDebouncedSearch';
 import { adminClientApi } from '@/lib/api/admin-client';
 import {
   AlertCircle,
   CheckCircle,
+  ChevronLeft,
+  ChevronRight,
   CircleGauge,
   Clock,
   Edit,
@@ -23,7 +26,7 @@ import {
   UserPlus,
   XCircle,
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 // Import validation helper hook
@@ -160,7 +163,11 @@ function ActionMenu({
 export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [total, setTotal] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+
   const [statusFilter, setStatusFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -169,6 +176,13 @@ export default function ClientsPage() {
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [typeFilter, setTypeFilter] = useState('all');
+  const [jumpToPage, setJumpToPage] = useState('');
+
+  // Search state - using debounced search hook
+  const [searchInput, debouncedSearchTerm, setSearchInput, isSearchDebouncing] = useDebouncedSearch(
+    '',
+    500
+  );
 
   const toast = useToast();
   const router = useRouter();
@@ -203,34 +217,63 @@ export default function ClientsPage() {
     },
   });
 
+  // Effect for search/filter changes - reset to page 1
   useEffect(() => {
-    fetchClients();
-  }, []);
+    console.log('[ClientsPage] Search/filter changed, resetting to page 1:', {
+      debouncedSearchTerm,
+      statusFilter,
+      typeFilter,
+      pageSize,
+    });
+    setCurrentPage(1);
+    setJumpToPage(''); // Clear jump input when resetting to page 1
+    fetchClients(1);
+  }, [debouncedSearchTerm, statusFilter, typeFilter, pageSize]);
 
-  const fetchClients = async () => {
-    try {
-      setLoading(true);
-
-      // Fetch clients from the Admin API (bypasses RLS limits)
-      const allClients = await adminClientApi.listClients();
-
-      // Transform and mock data for design
-      const transformedClients = allClients.map(client => ({
-        ...client,
-        // Mock fields for design
-        monthly_volume: Math.random() > 0.5 ? '$100,000+' : '$10,000-$50,000',
-        client_id_display: `CLT-${client.id.substring(0, 5).toUpperCase()}`,
-        status: client.status || 'pending_kyc', // Ensure status exists
-      }));
-
-      setClients(transformedClients);
-    } catch (error: any) {
-      console.error('Error fetching clients:', error);
-      toast.error('Error', 'Failed to load clients');
-    } finally {
-      setLoading(false);
+  // Effect for page changes
+  useEffect(() => {
+    if (currentPage > 1) {
+      console.log('[ClientsPage] Page changed to:', currentPage);
+      fetchClients(currentPage);
     }
-  };
+  }, [currentPage]);
+
+  const fetchClients = useCallback(
+    async (page = currentPage, search = debouncedSearchTerm) => {
+      try {
+        setLoading(true);
+
+        // Fetch clients from the Admin API with pagination and filters
+        const result = await adminClientApi.listClients({
+          search: search || undefined,
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+          type: typeFilter !== 'all' ? typeFilter : undefined,
+          page,
+          limit: pageSize,
+        });
+
+        // Transform and mock data for design
+        const transformedClients = result.clients.map(client => ({
+          ...client,
+          // Mock fields for design
+          monthly_volume: Math.random() > 0.5 ? '$100,000+' : '$10,000-$50,000',
+          client_id_display: `CLT-${client.id.substring(0, 5).toUpperCase()}`,
+          status: client.status || 'pending_kyc', // Ensure status exists
+        }));
+
+        setClients(transformedClients);
+        setTotal(result.total);
+        setTotalPages(result.totalPages);
+        setCurrentPage(result.page);
+      } catch (error: any) {
+        console.error('Error fetching clients:', error);
+        toast.error('Error', 'Failed to load clients');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [currentPage, debouncedSearchTerm, statusFilter, typeFilter, pageSize]
+  );
 
   // Handle Add Client button click - check for existing session
   const handleAddClientClick = () => {
@@ -336,23 +379,25 @@ export default function ClientsPage() {
     }
   };
 
-  const filteredClients = clients.filter(client => {
-    const matchesSearch =
-      searchTerm === '' ||
-      client.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.email?.toLowerCase().includes(searchTerm.toLowerCase());
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
-    const matchesStatus =
-      statusFilter === 'all' ||
-      (statusFilter === 'onboarding' && !client.onboarding_completed) ||
-      (statusFilter === 'active' && client.status === 'active') ||
-      (statusFilter === 'pending_kyc' && client.status === 'pending_kyc') ||
-      (statusFilter === 'suspended' && client.status === 'suspended');
+  const handleJumpToPage = () => {
+    const page = parseInt(jumpToPage, 10);
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      setJumpToPage(''); // Clear the input after jumping
+    }
+  };
 
-    return matchesSearch && matchesStatus;
-  });
+  const handleJumpInputKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleJumpToPage();
+    }
+  };
 
   const renderOnboardingStep = () => {
     switch (onboardingStep) {
@@ -503,9 +548,12 @@ export default function ClientsPage() {
       header: 'Business Name',
       render: client => (
         <div className='flex flex-col'>
-          <span className='text-sm font-medium text-gray-500'>
+          <button
+            onClick={() => handleViewClient(client)}
+            className='cursor-pointer text-left text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline'
+          >
             {client.company_name || 'No company'}
-          </span>
+          </button>
           {/* <span className='text-xs text-gray-500'>
             {client.first_name} {client.last_name}
           </span> */}
@@ -593,10 +641,15 @@ export default function ClientsPage() {
             <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400' />
             <Input
               placeholder='Search name or ID...'
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
               className='pl-10'
             />
+            {isSearchDebouncing && (
+              <div className='absolute top-1/2 right-3 -translate-y-1/2'>
+                <div className='h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-500'></div>
+              </div>
+            )}
           </div>
 
           <Select
@@ -609,6 +662,50 @@ export default function ClientsPage() {
             ]}
             className='w-full lg:w-40'
           />
+
+          <Select
+            value={pageSize.toString()}
+            onChange={value => {
+              setPageSize(parseInt(value, 10));
+              setCurrentPage(1); // Reset to first page when changing page size
+              setJumpToPage(''); // Clear jump input
+            }}
+            options={[
+              { value: '5', label: '5 per page' },
+              { value: '10', label: '10 per page' },
+              { value: '20', label: '20 per page' },
+              { value: '50', label: '50 per page' },
+              { value: '100', label: '100 per page' },
+            ]}
+            className='w-full lg:w-32'
+          />
+
+          {/* Jump to Page */}
+          <div className='flex items-center gap-2'>
+            <span className='hidden text-sm whitespace-nowrap text-gray-600 sm:inline'>
+              Go to page:
+            </span>
+            <span className='text-sm whitespace-nowrap text-gray-600 sm:hidden'>Page:</span>
+            <Input
+              type='number'
+              value={jumpToPage}
+              onChange={e => setJumpToPage(e.target.value)}
+              onKeyPress={handleJumpInputKeyPress}
+              placeholder='1'
+              min='1'
+              max={totalPages}
+              className='h-8 w-16 text-center text-sm'
+            />
+            <Button
+              onClick={handleJumpToPage}
+              disabled={
+                !jumpToPage || parseInt(jumpToPage, 10) < 1 || parseInt(jumpToPage, 10) > totalPages
+              }
+              className='h-8 cursor-pointer bg-blue-600 px-3 text-xs hover:bg-blue-700 disabled:bg-gray-300'
+            >
+              Go
+            </Button>
+          </div>
 
           <Select
             value={statusFilter}
@@ -641,22 +738,100 @@ export default function ClientsPage() {
           <div className='h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600'></div>
         </div>
       ) : (
-        <DataTable
-          data={filteredClients}
-          columns={columns}
-          getRowId={client => client.id}
-          showCheckbox={true}
-          onSelectionChange={ids => console.log('Selected:', ids)}
-        />
+        <>
+          <DataTable
+            data={clients}
+            columns={columns}
+            getRowId={client => client.id}
+            showCheckbox={true}
+            onSelectionChange={ids => console.log('Selected:', ids)}
+          />
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className='mt-6 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6'>
+              <div className='flex flex-1 justify-between sm:hidden'>
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className='relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50'
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className='relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50'
+                >
+                  Next
+                </button>
+              </div>
+              <div className='hidden sm:flex sm:flex-1 sm:items-center sm:justify-between'>
+                <div>
+                  <p className='text-sm text-gray-700'>
+                    Showing <span className='font-medium'>{(currentPage - 1) * pageSize + 1}</span>{' '}
+                    to{' '}
+                    <span className='font-medium'>{Math.min(currentPage * pageSize, total)}</span>{' '}
+                    of <span className='font-medium'>{total}</span> results
+                  </p>
+                </div>
+                <div>
+                  <nav
+                    className='isolate inline-flex -space-x-px rounded-md shadow-sm'
+                    aria-label='Pagination'
+                  >
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className='relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-50'
+                    >
+                      <span className='sr-only'>Previous</span>
+                      <ChevronLeft className='h-5 w-5' aria-hidden='true' />
+                    </button>
+
+                    {/* Page numbers */}
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      const pageNumber = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                      if (pageNumber > totalPages) return null;
+
+                      return (
+                        <button
+                          key={pageNumber}
+                          onClick={() => handlePageChange(pageNumber)}
+                          className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
+                            pageNumber === currentPage
+                              ? 'z-10 bg-blue-600 text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
+                              : 'text-gray-900 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
+                          }`}
+                        >
+                          {pageNumber}
+                        </button>
+                      );
+                    })}
+
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className='relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-50'
+                    >
+                      <span className='sr-only'>Next</span>
+                      <ChevronRight className='h-5 w-5' aria-hidden='true' />
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Empty State */}
-      {filteredClients.length === 0 && !loading && (
+      {clients.length === 0 && !loading && (
         <div className='rounded-lg border bg-white py-12 text-center'>
           <UserPlus className='mx-auto h-12 w-12 text-gray-400' />
           <h3 className='mt-2 text-sm font-medium text-gray-900'>No clients found</h3>
           <p className='mt-1 text-sm text-gray-500'>
-            {searchTerm || statusFilter !== 'all'
+            {debouncedSearchTerm || statusFilter !== 'all' || typeFilter !== 'all'
               ? 'Try adjusting your search or filters.'
               : 'Get started by adding your first client.'}
           </p>
