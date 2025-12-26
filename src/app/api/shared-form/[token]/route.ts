@@ -1,10 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest, { params }: { params: { token: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   try {
     const supabase = await createClient();
-    const shareToken = params.token;
+    const { token: shareToken } = await params;
 
     if (!shareToken) {
       return NextResponse.json({ error: 'Share token required' }, { status: 400 });
@@ -57,10 +57,10 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { token: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   try {
     const supabase = await createClient();
-    const shareToken = params.token;
+    const { token: shareToken } = await params;
     const body = await request.json();
 
     if (!shareToken) {

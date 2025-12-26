@@ -111,7 +111,7 @@ export default function NewSignupPage() {
       case 6:
         return <Step6PEPSanctionsScreening formData={formData} onChange={updateFormData} />;
       case 7:
-        return <Step7DocumentUpload formData={formData} onChange={updateFormData} />;
+        return <Step7DocumentUpload formData={formData} onChange={updateFormData} sessionId={null} />;
       case 8:
         return <Step8InformationSubmitted formData={formData} onChange={updateFormData} />;
       default:
