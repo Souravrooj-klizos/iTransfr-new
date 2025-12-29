@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button';
 import { DataTable, TableColumn } from '@/components/ui/DataTable';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
+import { Pagination } from '@/components/ui/Pagination';
 import { Select } from '@/components/ui/Select';
 import { OnboardingStepSkeleton } from '@/components/ui/SkeletonLoader';
 import { useToast } from '@/components/ui/Toast';
@@ -12,8 +13,6 @@ import { adminClientApi } from '@/lib/api/admin-client';
 import {
   AlertCircle,
   CheckCircle,
-  ChevronLeft,
-  ChevronRight,
   CircleGauge,
   Clock,
   Edit,
@@ -26,7 +25,7 @@ import {
   UserPlus,
   XCircle,
 } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 // Import validation helper hook
@@ -217,25 +216,34 @@ export default function ClientsPage() {
     },
   });
 
+  const isMounted = useRef(false);
+
   // Effect for search/filter changes - reset to page 1
   useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
+
     console.log('[ClientsPage] Search/filter changed, resetting to page 1:', {
       debouncedSearchTerm,
       statusFilter,
       typeFilter,
       pageSize,
     });
-    setCurrentPage(1);
+    // If we are already on page 1, the page change effect won't run, so we must fetch manually.
+    // If we are NOT on page 1, setting current page to 1 will trigger the page change effect.
+    if (currentPage === 1) {
+      fetchClients(1);
+    } else {
+      setCurrentPage(1);
+    }
     setJumpToPage(''); // Clear jump input when resetting to page 1
-    fetchClients(1);
   }, [debouncedSearchTerm, statusFilter, typeFilter, pageSize]);
 
   // Effect for page changes
   useEffect(() => {
-    if (currentPage > 1) {
-      console.log('[ClientsPage] Page changed to:', currentPage);
-      fetchClients(currentPage);
-    }
+    fetchClients(currentPage);
   }, [currentPage]);
 
   const fetchClients = useCallback(
@@ -664,20 +672,16 @@ export default function ClientsPage() {
           />
 
           <Select
-            value={pageSize.toString()}
-            onChange={value => {
-              setPageSize(parseInt(value, 10));
-              setCurrentPage(1); // Reset to first page when changing page size
-              setJumpToPage(''); // Clear jump input
-            }}
+            value={statusFilter}
+            onChange={setStatusFilter}
             options={[
-              { value: '5', label: '5 per page' },
-              { value: '10', label: '10 per page' },
-              { value: '20', label: '20 per page' },
-              { value: '50', label: '50 per page' },
-              { value: '100', label: '100 per page' },
+              { value: 'all', label: 'All Status' },
+              { value: 'onboarding', label: 'In Onboarding' },
+              { value: 'active', label: 'Active' },
+              { value: 'pending_kyc', label: 'Pending KYC' },
+              { value: 'suspended', label: 'Suspended' },
             ]}
-            className='w-full lg:w-32'
+            className='w-full lg:w-40'
           />
 
           {/* Jump to Page */}
@@ -706,19 +710,6 @@ export default function ClientsPage() {
               Go
             </Button>
           </div>
-
-          <Select
-            value={statusFilter}
-            onChange={setStatusFilter}
-            options={[
-              { value: 'all', label: 'All Status' },
-              { value: 'onboarding', label: 'In Onboarding' },
-              { value: 'active', label: 'Active' },
-              { value: 'pending_kyc', label: 'Pending KYC' },
-              { value: 'suspended', label: 'Suspended' },
-            ]}
-            className='w-full lg:w-40'
-          />
         </div>
 
         <div>
@@ -749,77 +740,35 @@ export default function ClientsPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className='mt-6 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6'>
-              <div className='flex flex-1 justify-between sm:hidden'>
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className='relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50'
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className='relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50'
-                >
-                  Next
-                </button>
-              </div>
-              <div className='hidden sm:flex sm:flex-1 sm:items-center sm:justify-between'>
-                <div>
+            <div className='mt-6 border-t border-gray-200 bg-white px-4 py-3 sm:px-6'>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+                itemsPerPage={pageSize.toString()}
+                onItemsPerPageChange={value => {
+                  setPageSize(parseInt(value, 10));
+                  setCurrentPage(1);
+                  setJumpToPage('');
+                }}
+                itemsPerPageOptions={[
+                  { value: '5', label: '5' },
+                  { value: '10', label: '10' },
+                  { value: '20', label: '20' },
+                  { value: '50', label: '50' },
+                  { value: '100', label: '100' },
+                ]}
+                showItemsPerPage={true}
+                renderLeft={
                   <p className='text-sm text-gray-700'>
                     Showing <span className='font-medium'>{(currentPage - 1) * pageSize + 1}</span>{' '}
                     to{' '}
                     <span className='font-medium'>{Math.min(currentPage * pageSize, total)}</span>{' '}
                     of <span className='font-medium'>{total}</span> results
                   </p>
-                </div>
-                <div>
-                  <nav
-                    className='isolate inline-flex -space-x-px rounded-md shadow-sm'
-                    aria-label='Pagination'
-                  >
-                    <button
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className='relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-50'
-                    >
-                      <span className='sr-only'>Previous</span>
-                      <ChevronLeft className='h-5 w-5' aria-hidden='true' />
-                    </button>
-
-                    {/* Page numbers */}
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      const pageNumber = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
-                      if (pageNumber > totalPages) return null;
-
-                      return (
-                        <button
-                          key={pageNumber}
-                          onClick={() => handlePageChange(pageNumber)}
-                          className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
-                            pageNumber === currentPage
-                              ? 'z-10 bg-blue-600 text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
-                              : 'text-gray-900 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
-                          }`}
-                        >
-                          {pageNumber}
-                        </button>
-                      );
-                    })}
-
-                    <button
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className='relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-50'
-                    >
-                      <span className='sr-only'>Next</span>
-                      <ChevronRight className='h-5 w-5' aria-hidden='true' />
-                    </button>
-                  </nav>
-                </div>
-              </div>
+                }
+                className='mt-0'
+              />
             </div>
           )}
         </>

@@ -1,5 +1,5 @@
-import { sendOTPEmail } from '@/lib/services/email';
 import { supabaseAdmin } from '@/lib/supabaseClient';
+import { sendOTPEmail } from '@/services/email';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {

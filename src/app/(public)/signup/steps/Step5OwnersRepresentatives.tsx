@@ -9,27 +9,33 @@ import {
   COUNTRY_OPTIONS,
   getStatesForCountry,
   hasStateDropdown,
-  PHONE_CODE_OPTIONS
+  PHONE_CODE_OPTIONS,
 } from '@/lib/constants/countries';
-import { Building2, Check, Copy, Mail, Plus, Share, Trash2, User } from 'lucide-react';
+import { OwnershipValidationService, Owner as ServiceOwner } from '@/lib/validations/ownership-validation';
+import {
+  AlertTriangle,
+  Building2,
+  Check,
+  CheckCircle,
+  Copy,
+  Mail,
+  Plus,
+  Share,
+  Trash2,
+  User,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-interface Owner {
-  id: string;
-  type: 'person' | 'entity';
-  // Common
-  percentage: string;
-  // Person Specific
-  firstName?: string;
+// Local Owner interface for the component (extends service Owner with UI-specific fields)
+interface Owner extends ServiceOwner {
+  // UI-specific fields for the form component
+  percentage: string; // String for input field binding
+  // Additional person-specific fields
   middleName?: string;
-  lastName?: string;
-  email?: string;
-  phone?: string;
   phoneCountryCode?: string;
   dob?: string;
   citizenship?: string;
   secondaryCitizenship?: string;
-  role?: string;
   residentialCountry?: string;
   residentialAddress?: string;
   residentialApt?: string;
@@ -50,20 +56,23 @@ interface Owner {
   sourceOfWealth?: string;
   authorizedSigner?: boolean;
   taxId?: string;
-  // Entity Specific
-  entityName?: string;
-  entityCountry?: string;
-  entityType?: string;
-  registrationNumber?: string;
+  // Entity-specific field mapping
+  entityCountry?: string; // Maps to countryOfIncorporation
 }
 
 interface Step5Props {
   formData?: any;
   onChange?: (field: string, value: any) => void;
   errors?: Record<string, string>;
+  onValidationChange?: (isValid: boolean, errors: string[]) => void;
 }
 
-export function Step5OwnersRepresentatives({ formData = {}, onChange, errors = {} }: Step5Props) {
+export function Step5OwnersRepresentatives({
+  formData = {},
+  onChange,
+  errors = {},
+  onValidationChange,
+}: Step5Props) {
   // Use formData.owners as the source of truth, or default to empty array
   const owners: Owner[] = Array.isArray(formData.owners) ? formData.owners : [];
 
@@ -75,12 +84,55 @@ export function Step5OwnersRepresentatives({ formData = {}, onChange, errors = {
     type: string;
   } | null>(null);
 
-  // Helper to update parent data
+  // Add validation state
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [ownershipValidation, setOwnershipValidation] = useState(
+    OwnershipValidationService.validateOwnership([])
+  );
+
+  // Helper to update parent data with validation
   const updateParent = (newOwners: Owner[]) => {
     if (onChange) {
       onChange('owners', newOwners);
+
+      // Convert to validation service format
+      const validationOwners: ServiceOwner[] = newOwners.map(owner => ({
+        id: owner.id,
+        type: owner.type,
+        ownershipPercentage: parseFloat(owner.percentage) || 0,
+        // Add other required fields for validation
+        firstName: owner.firstName,
+        lastName: owner.lastName,
+        email: owner.email,
+        phone: owner.phone,
+        // Entity fields
+        entityName: owner.entityName,
+        countryOfIncorporation: owner.entityCountry,
+        entityType: owner.entityType,
+        registrationNumber: owner.registrationNumber,
+      }));
+
+      // Update validation state
+      const newValidation = OwnershipValidationService.validateOwnership(validationOwners);
+      setOwnershipValidation(newValidation);
+
+      // Check for field-level errors
+      const fieldErrors: string[] = [];
+      validationOwners.forEach((owner, index) => {
+        const ownerValidation = OwnershipValidationService.validateOwner(owner);
+        if (!ownerValidation.isValid) {
+          fieldErrors.push(...ownerValidation.errors.map(err => `Owner ${index + 1}: ${err}`));
+        }
+      });
+      setValidationErrors(fieldErrors);
+
+      // Update total for backward compatibility
       const total = newOwners.reduce((acc, owner) => acc + (parseFloat(owner.percentage) || 0), 0);
       onChange('ownershipPercentage', total);
+
+      // Notify parent of validation status
+      const allErrors = [...(newValidation.error ? [newValidation.error] : []), ...fieldErrors];
+      onValidationChange?.(!newValidation.isValid || fieldErrors.length > 0, allErrors);
     }
   };
 
@@ -89,7 +141,7 @@ export function Step5OwnersRepresentatives({ formData = {}, onChange, errors = {
     // Allow empty string for clearing the field
     if (newValue === '') {
       const updatedOwners = owners.map(o =>
-        o.id === ownerId ? { ...o, percentage: '' } : o
+        o.id === ownerId ? { ...o, percentage: '', ownershipPercentage: 0 } : o
       );
       updateParent(updatedOwners);
       return;
@@ -110,28 +162,16 @@ export function Step5OwnersRepresentatives({ formData = {}, onChange, errors = {
     }
 
     // Calculate what the new total would be
-    const currentOwnerPercentage = parseFloat(
-      owners.find(o => o.id === ownerId)?.percentage || '0'
-    );
     const otherOwnersTotal = owners
       .filter(o => o.id !== ownerId)
       .reduce((acc, owner) => acc + (parseFloat(owner.percentage) || 0), 0);
 
     const newTotal = otherOwnersTotal + newPercentage;
 
-    // Check if new total exceeds 100%
-    if (newTotal > 100) {
-      const maxAllowed = 100 - otherOwnersTotal;
-      toast.error(
-        'Ownership Limit Exceeded',
-        `Total ownership cannot exceed 100%. Maximum allowed for this owner: ${maxAllowed.toFixed(2)}%`
-      );
-      return;
-    }
-
-    // Update is valid
+    // Allow any value for now - validation will happen at the ownership level
+    // The validation service will handle the 100% requirement
     const updatedOwners = owners.map(o =>
-      o.id === ownerId ? { ...o, percentage: newValue } : o
+      o.id === ownerId ? { ...o, percentage: newValue, ownershipPercentage: newPercentage } : o
     );
     updateParent(updatedOwners);
   };
@@ -203,6 +243,7 @@ export function Step5OwnersRepresentatives({ formData = {}, onChange, errors = {
       id: Date.now().toString(),
       type: 'person',
       percentage: '',
+      ownershipPercentage: 0,
       // Basic Info
       firstName: '',
       middleName: '',
@@ -246,6 +287,7 @@ export function Step5OwnersRepresentatives({ formData = {}, onChange, errors = {
       id: Date.now().toString(),
       type: 'entity',
       percentage: '',
+      ownershipPercentage: 0,
       entityName: '',
       entityCountry: '',
       entityType: '',
@@ -270,30 +312,93 @@ export function Step5OwnersRepresentatives({ formData = {}, onChange, errors = {
     }
   };
 
-  const totalOwnership = owners.reduce(
-    (acc, owner) => acc + (parseFloat(owner.percentage) || 0),
-    0
-  );
+  // Calculate validation status
+  const serviceOwners: ServiceOwner[] = owners.map(owner => ({
+    id: owner.id,
+    type: owner.type,
+    ownershipPercentage: parseFloat(owner.percentage) || 0,
+    firstName: owner.firstName,
+    lastName: owner.lastName,
+    email: owner.email,
+    phone: owner.phone,
+    entityName: owner.entityName,
+    countryOfIncorporation: owner.entityCountry,
+    entityType: owner.entityType,
+    registrationNumber: owner.registrationNumber,
+  }));
 
-  const remainingOwnership = 100 - totalOwnership;
+  const progressPercentage = OwnershipValidationService.getProgressPercentage(serviceOwners);
+  const progressColor = OwnershipValidationService.getProgressColor(serviceOwners);
+  const progressMessage = OwnershipValidationService.getProgressMessage(serviceOwners);
+  const canProceed = OwnershipValidationService.canSubmitForm(serviceOwners);
 
   return (
     <div className='space-y-6 pr-2'>
       <section className='sticky top-[0px] z-60 -mt-4 bg-white py-4'>
-        <div className='mb-4 rounded-xl border border-gray-100 bg-white px-4 py-2 shadow-sm'>
-          <div className='mb-2 flex items-center justify-between'>
-            <h3 className='font-medium text-gray-900'>Total Ownership</h3>
-            <span className='font-medium text-red-500'>{totalOwnership}%</span>
+        {/* Ownership Validation Status */}
+        <div className='mb-4 rounded-xl border bg-white px-4 py-3 shadow-sm'>
+          <div className='mb-3 flex items-center justify-between'>
+            <h3 className='font-medium text-gray-900'>Ownership Allocation</h3>
+            <div className='flex items-center gap-2'>
+              {ownershipValidation.isValid ? (
+                <CheckCircle className='h-5 w-5 text-green-600' />
+              ) : (
+                <AlertTriangle className='h-5 w-5 text-red-500' />
+              )}
+              <span
+                className={`font-medium ${
+                  ownershipValidation.isValid ? 'text-green-600' : 'text-red-500'
+                }`}
+              >
+                {ownershipValidation.totalPercentage}%
+              </span>
+            </div>
           </div>
 
+          {/* Progress Bar */}
           <div className='mb-2 h-2 w-full overflow-hidden rounded-full bg-gray-100'>
             <div
-              className='h-full bg-black transition-all duration-300 ease-out'
-              style={{ width: `${Math.min(totalOwnership, 100)}%` }}
+              className={`h-full transition-all duration-300 ease-out ${
+                progressColor === 'green'
+                  ? 'bg-green-500'
+                  : progressColor === 'red'
+                    ? 'bg-red-500'
+                    : 'bg-yellow-500'
+              }`}
+              style={{ width: `${Math.min(progressPercentage, 100)}%` }}
             />
           </div>
 
-          <p className='text-sm text-gray-500'>{remainingOwnership}% remaining to allocate</p>
+          {/* Status Message */}
+          <p
+            className={`text-sm ${
+              progressColor === 'green'
+                ? 'text-green-600'
+                : progressColor === 'red'
+                  ? 'text-red-600'
+                  : 'text-yellow-600'
+            }`}
+          >
+            {progressMessage}
+          </p>
+
+          {/* Validation Errors */}
+          {!ownershipValidation.isValid && ownershipValidation.error && (
+            <p className='mt-2 text-sm text-red-600'>{ownershipValidation.error}</p>
+          )}
+
+          {/* Field Errors */}
+          {validationErrors.length > 0 && (
+            <div className='mt-2'>
+              <p className='text-sm font-medium text-red-600'>Validation Errors:</p>
+              <ul className='mt-1 list-inside list-disc text-sm text-red-600'>
+                {validationErrors.slice(0, 3).map((error, index) => (
+                  <li key={index}>{error}</li>
+                ))}
+                {validationErrors.length > 3 && <li>...and {validationErrors.length - 3} more</li>}
+              </ul>
+            </div>
+          )}
         </div>
         {/* Total Ownership Card */}
 
@@ -354,7 +459,7 @@ export function Step5OwnersRepresentatives({ formData = {}, onChange, errors = {
                   Share Form
                 </button>
                 <button
-                  onClick={() => handleDeleteOwner(owner.id)}
+                  onClick={() => handleDeleteOwner(owner.id || '')}
                   className='flex cursor-pointer items-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-red-600 transition-colors hover:bg-red-50'
                 >
                   <Trash2 className='h-4 w-4' />
@@ -448,8 +553,8 @@ export function Step5OwnersRepresentatives({ formData = {}, onChange, errors = {
                     </label>
                     <Input
                       type='number'
-                      value={owner.percentage}
-                      onChange={e => handlePercentageChange(owner.id, e.target.value)}
+                      value={owner.percentage || ''}
+                      onChange={e => handlePercentageChange(owner.id || '', e.target.value)}
                       placeholder='0'
                       min='0'
                       max='100'
@@ -532,10 +637,8 @@ export function Step5OwnersRepresentatives({ formData = {}, onChange, errors = {
                       error={errors[`owners.${index}.email`]}
                     />
                   </div>
-                <div className='space-y-2'>
-                    <label className='text-sm font-medium text-gray-900'>
-                      Phone Number
-                    </label>
+                  <div className='space-y-2'>
+                    <label className='text-sm font-medium text-gray-900'>Phone Number</label>
                     <div className='flex gap-2'>
                       <div className='w-32'>
                         <Select
@@ -590,9 +693,7 @@ export function Step5OwnersRepresentatives({ formData = {}, onChange, errors = {
                     />
                   </div>
                   <div className='space-y-2'>
-                    <label className='text-sm font-medium text-gray-900'>
-                      Citizenship
-                    </label>
+                    <label className='text-sm font-medium text-gray-900'>Citizenship</label>
                     <Select
                       value={owner.citizenship || ''}
                       onChange={val => {
@@ -629,9 +730,7 @@ export function Step5OwnersRepresentatives({ formData = {}, onChange, errors = {
                     />
                   </div>
                   <div className='space-y-2'>
-                    <label className='text-sm font-medium text-gray-900'>
-                      Tax ID / SSN
-                    </label>
+                    <label className='text-sm font-medium text-gray-900'>Tax ID / SSN</label>
                     <Input
                       value={owner.taxId || ''}
                       onChange={e => {
@@ -649,9 +748,7 @@ export function Step5OwnersRepresentatives({ formData = {}, onChange, errors = {
                 {/* Row 4: Role & Ownership % */}
                 <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
                   <div className='space-y-2'>
-                    <label className='text-sm font-medium text-gray-900'>
-                      Role
-                    </label>
+                    <label className='text-sm font-medium text-gray-900'>Role</label>
                     <Select
                       value={owner.role || ''}
                       onChange={val => {
@@ -677,8 +774,8 @@ export function Step5OwnersRepresentatives({ formData = {}, onChange, errors = {
                     <div className='relative'>
                       <Input
                         type='number'
-                        value={owner.percentage}
-                        onChange={e => handlePercentageChange(owner.id, e.target.value)}
+                        value={owner.percentage || ''}
+                        onChange={e => handlePercentageChange(owner.id || '', e.target.value)}
                         placeholder='0'
                         className='pr-12'
                         min='0'
@@ -892,7 +989,8 @@ export function Step5OwnersRepresentatives({ formData = {}, onChange, errors = {
                         />
                       </div>
                       <div className='space-y-2'>
-                        <label className='text-sm font-medium text-gray-900'>Issue Date</label> <span className='text-red-500'>*</span>
+                        <label className='text-sm font-medium text-gray-900'>Issue Date</label>{' '}
+                        <span className='text-red-500'>*</span>
                         <Input
                           type='date'
                           value={owner.idIssueDate || ''}
@@ -990,9 +1088,7 @@ export function Step5OwnersRepresentatives({ formData = {}, onChange, errors = {
                         />
                       </div>
                       <div className='space-y-2'>
-                        <label className='text-sm font-medium text-gray-900'>
-                          Employer Name
-                        </label>
+                        <label className='text-sm font-medium text-gray-900'>Employer Name</label>
                         <Input
                           value={owner.employerName || ''}
                           onChange={e => {
@@ -1095,7 +1191,12 @@ export function Step5OwnersRepresentatives({ formData = {}, onChange, errors = {
         ))}
       </div>
 
-      <Modal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} size='lg' title='Share Form'>
+      <Modal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        size='lg'
+        title='Share Form'
+      >
         <div className='space-y-6'>
           <div className='flex items-start justify-between'>
             <div>

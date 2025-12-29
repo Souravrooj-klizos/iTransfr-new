@@ -4,16 +4,18 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { Select } from '@/components/ui/Select';
-import { Plus } from 'lucide-react';
+import { adminClientApi } from '@/lib/api/admin-client';
+import { Plus, Loader2 } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface AddRepresentativeModalProps {
   isOpen: boolean;
   onClose: () => void;
   clientId: string;
+  onSuccess?: () => void;
 }
 
-export function AddRepresentativeModal({ isOpen, onClose, clientId }: AddRepresentativeModalProps) {
+export function AddRepresentativeModal({ isOpen, onClose, clientId, onSuccess }: AddRepresentativeModalProps) {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -32,15 +34,75 @@ export function AddRepresentativeModal({ isOpen, onClose, clientId }: AddReprese
     sourceOfWealth: '',
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submitting Representative:', formData);
-    // Here we would call the API to save the representative
-    onClose();
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // Prepare the data for API submission
+      const submissionData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        dob: formData.dob,
+        phoneCountry: formData.phoneCountry,
+        phoneNumber: formData.phoneNumber,
+        title: formData.title,
+        ownershipPercentage: parseFloat(formData.ownershipPercentage) || 0,
+        employmentStatus: formData.employmentStatus,
+        occupation: formData.occupation,
+        employer: formData.employer,
+        annualIncome: formData.annualIncome,
+        taxId: formData.taxId,
+        sourceOfFunds: formData.sourceOfFunds,
+        sourceOfWealth: formData.sourceOfWealth,
+      };
+
+      const response = await adminClientApi.addRepresentative(clientId, submissionData);
+
+      if (response.success) {
+        // Reset form
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          dob: '',
+          phoneCountry: 'US',
+          phoneNumber: '',
+          title: '',
+          ownershipPercentage: '',
+          employmentStatus: '',
+          occupation: '',
+          employer: '',
+          annualIncome: '',
+          taxId: '',
+          sourceOfFunds: '',
+          sourceOfWealth: '',
+        });
+
+        // Call onSuccess callback if provided
+        if (onSuccess) {
+          onSuccess();
+        }
+
+        onClose();
+      } else {
+        setError(response.error || 'Failed to add representative');
+      }
+    } catch (error: any) {
+      console.error('Error adding representative:', error);
+      setError(error.message || 'An unexpected error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const employmentStatusOptions = [
@@ -249,12 +311,22 @@ export function AddRepresentativeModal({ isOpen, onClose, clientId }: AddReprese
 
         {/* Submit Button */}
         <div className='pt-4'>
+          {error && (
+            <div className='mb-4 rounded-lg border border-red-200 bg-red-50 p-4'>
+              <p className='text-sm text-red-600'>{error}</p>
+            </div>
+          )}
           <Button
             type='submit'
-            className='bg-gradient-blue flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl font-normal text-white transition-all hover:bg-blue-700'
+            disabled={isSubmitting}
+            className='bg-gradient-blue flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl font-normal text-white transition-all hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
           >
-            <Plus className='h-5 w-5' />
-            Add Representative
+            {isSubmitting ? (
+              <Loader2 className='h-5 w-5 animate-spin' />
+            ) : (
+              <Plus className='h-5 w-5' />
+            )}
+            {isSubmitting ? 'Adding Representative...' : 'Add Representative'}
           </Button>
         </div>
       </form>

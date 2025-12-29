@@ -272,6 +272,9 @@ export function ClientRepresentatives({ clientId }: ClientRepresentativesProps) 
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         clientId={clientId}
+        onSuccess={() => {
+          fetchReps(); // Refresh the list after adding a representative
+        }}
       />
 
       {/* View Representative Modal */}

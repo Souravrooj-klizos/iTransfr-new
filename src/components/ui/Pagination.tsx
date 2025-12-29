@@ -9,6 +9,8 @@ interface PaginationProps {
   onItemsPerPageChange?: (value: string) => void;
   itemsPerPageOptions?: { value: string; label: string }[];
   showItemsPerPage?: boolean;
+  className?: string;
+  renderLeft?: React.ReactNode;
 }
 
 export function Pagination({
@@ -23,6 +25,8 @@ export function Pagination({
     { value: '50', label: '50' },
   ],
   showItemsPerPage = true,
+  className = '',
+  renderLeft,
 }: PaginationProps) {
   // Generate page numbers to display
   const getPageNumbers = () => {
@@ -52,8 +56,14 @@ export function Pagination({
   };
 
   return (
-    <div className='mt-4 flex flex-col items-center justify-between gap-4 sm:flex-row'>
-      <div className='flex items-center gap-2'>
+    <div
+      className={`mt-4 flex flex-col items-center justify-between gap-4 sm:flex-row ${className}`}
+    >
+      {/* Left side: Results info */}
+      <div className='flex-1'>{renderLeft}</div>
+
+      {/* Center: Page numbers */}
+      <div className='flex flex-1 items-center justify-center gap-2'>
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
@@ -90,19 +100,22 @@ export function Pagination({
         </button>
       </div>
 
-      {showItemsPerPage && onItemsPerPageChange && (
-        <div className='flex items-center gap-2'>
-          <span className='text-sm text-gray-600'>View per Page</span>
-          <Select
-            options={itemsPerPageOptions}
-            value={itemsPerPage}
-            onChange={onItemsPerPageChange}
-            className='w-20'
-            dropdownClassName='min-w-[80px]'
-            direction='up'
-          />
-        </div>
-      )}
+      {/* Right side: Items per page */}
+      <div className='flex flex-1 items-center justify-end gap-2'>
+        {showItemsPerPage && onItemsPerPageChange && (
+          <>
+            <span className='text-sm text-gray-600'>View per Page</span>
+            <Select
+              options={itemsPerPageOptions}
+              value={itemsPerPage}
+              onChange={onItemsPerPageChange}
+              className='w-18'
+              dropdownClassName='min-w-[80px]'
+              direction='up'
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 }
