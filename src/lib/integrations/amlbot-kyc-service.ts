@@ -139,7 +139,9 @@ export interface AMLBotFormUrl {
 }
 
 // Map our document types to AMLBot document types
+// Map our document types to AMLBot document types
 export const DOCUMENT_TYPE_MAP: Record<string, AMLBotDocumentType> = {
+  // Legacy camelCase
   passport: 'PASSPORT',
   driversLicenseFront: 'DRIVERS_LICENSE',
   driversLicenseBack: 'DRIVERS_LICENSE',
@@ -152,6 +154,20 @@ export const DOCUMENT_TYPE_MAP: Record<string, AMLBotDocumentType> = {
   formationDocument: 'OTHER',
   proofOfRegistration: 'OTHER',
   proofOfOwnership: 'OTHER',
+
+  // New snake_case (Frontend Step 7)
+  personal_id: 'GOVERNMENT_ID',
+  proof_address: 'OTHER',
+  formation_doc: 'OTHER',
+  proof_of_registration: 'OTHER',
+  proof_of_ownership: 'OTHER',
+  bank_statement: 'FINANCIAL_DOCUMENT',
+  tax_id: 'OTHER',
+  msb_cert: 'OTHER',
+  drivers_license: 'DRIVERS_LICENSE',
+  national_id: 'GOVERNMENT_ID',
+
+  // Owner specific types
   owner_passport: 'PASSPORT',
   owner_driversLicense: 'DRIVERS_LICENSE',
   owner_national_id: 'GOVERNMENT_ID',
@@ -597,7 +613,8 @@ export async function submitKYC(input: KYCSubmissionInput): Promise<KYCSubmissio
   console.log('[AMLBot KYC] Starting KYC submission for:', input.firstName, input.lastName);
 
   const documentIds: string[] = [];
-  const usedDocumentTypes: Set<AMLBotDocumentType> = new Set();
+  // Use Set<string> to store the underlying AMLBot type strings
+  const usedAmlTypes: Set<string> = new Set();
   const skippedDocuments: string[] = [];
   let applicantId = '';
 
@@ -645,7 +662,7 @@ export async function submitKYC(input: KYCSubmissionInput): Promise<KYCSubmissio
 
       // Check if this document type has already been used
       // AMLBot only allows ONE document per type
-      if (usedDocumentTypes.has(amlbotDocType)) {
+      if (usedAmlTypes.has(amlbotDocType)) {
         console.log(
           `[AMLBot KYC] Skipping duplicate document type: ${amlbotDocType} (${group.type})`
         );
@@ -681,7 +698,7 @@ export async function submitKYC(input: KYCSubmissionInput): Promise<KYCSubmissio
           });
 
           documentIds.push(document.document_id);
-          usedDocumentTypes.add(amlbotDocType);
+          usedAmlTypes.add(amlbotDocType);
           console.log('[AMLBot KYC] Created document:', document.document_id, amlbotDocType);
         }
       } catch (docError: any) {
@@ -691,7 +708,7 @@ export async function submitKYC(input: KYCSubmissionInput): Promise<KYCSubmissio
 
         // If it's a duplicate error, mark the type as used
         if (docError.response?.data?.type === 'limit_exceeded') {
-          usedDocumentTypes.add(amlbotDocType);
+          usedAmlTypes.add(amlbotDocType);
         }
       }
     }

@@ -1,8 +1,10 @@
+import { downloadDocument } from '@/lib/aws-s3';
 import {
-  createApplicant,
-  createVerification,
-  getApplicantByExternalId,
-  type CreateApplicantRequest,
+    createApplicant,
+    createVerification,
+    getApplicantByExternalId,
+    uploadDocument,
+    type CreateApplicantRequest,
 } from '@/lib/integrations/amlbot';
 import { supabaseAdmin } from '@/lib/supabaseClient';
 import { NextRequest, NextResponse } from 'next/server';
@@ -91,7 +93,7 @@ export async function POST(request: NextRequest) {
       last_name: applicantData.last_name,
     });
 
-    // 4. Check if applicant already exists in AMLBot
+    // 4. Create or Get Applicant in AMLBot
     let applicant = await getApplicantByExternalId(userId);
 
     if (!applicant) {
@@ -102,19 +104,108 @@ export async function POST(request: NextRequest) {
       console.log('[Submit AMLBot] Using existing AMLBot applicant:', applicant.id);
     }
 
-    // 5. Create verification request
+    // 5. Gather and Upload Documents
+    // Strategy: Look in kyc_documents (standard) AND client_profiles.documents (ad-hoc)
+
+    // Fetch kyc_documents
+    let docsToUpload: any[] = [];
+
+    // A. Check kyc_documents table
+    if (kycRecord) {
+        const { data: kycDocs } = await supabaseAdmin
+            .from('kyc_documents')
+            .select('*')
+            .eq('kycRecordId', kycRecord.id);
+
+        if (kycDocs && kycDocs.length > 0) {
+            docsToUpload = [...docsToUpload, ...kycDocs.map(d => ({
+                type: d.documentType,
+                s3Key: d.s3Key,
+                fileName: d.fileName,
+                mimeType: d.mimeType
+            }))];
+        }
+    }
+
+    // B. Check client_profiles.documents (JSONB)
+    // Note: Use 'documents' column if it exists in your schema, assuming it matches Step7 structure
+    const profileDocs = (profile as any).documents;
+    if (Array.isArray(profileDocs) && profileDocs.length > 0) {
+        // Avoid duplicates by s3Key
+        for (const pd of profileDocs) {
+            if (pd.s3Key && !docsToUpload.find(d => d.s3Key === pd.s3Key)) {
+                docsToUpload.push({
+                    type: pd.type || pd.documentType,
+                    s3Key: pd.s3Key,
+                    fileName: pd.fileName,
+                    mimeType: pd.mimeType
+                });
+            }
+        }
+    }
+
+    console.log(`[Submit AMLBot] Found ${docsToUpload.length} documents to upload`);
+
+    if (docsToUpload.length === 0) {
+        console.warn('[Submit AMLBot] No documents found to upload! Verification may fail or be rejected.');
+        // We continue anyway, as sometimes just data verification is requested?
+        // But user specifically complained about document failure.
+    }
+
+    for (const doc of docsToUpload) {
+        try {
+            if (!doc.s3Key) {
+                console.warn('[Submit AMLBot] Skipping document with missing S3 key:', doc.fileName);
+                continue;
+            }
+
+            console.log(`[Submit AMLBot] Downloading ${doc.fileName} (${doc.s3Key})...`);
+            try {
+                const fileBuffer = await downloadDocument(doc.s3Key);
+
+                // Map type to AMLBot types
+                let amlType: any = 'other';
+                const lowerType = (doc.type || '').toLowerCase();
+
+                if (lowerType.includes('passport')) amlType = 'passport';
+                else if (lowerType.includes('driver') || lowerType.includes('license')) amlType = 'drivers_license';
+                else if (lowerType.includes('id_card') || lowerType.includes('id card') || lowerType === 'personal_id') amlType = 'national_id';
+                else if (lowerType.includes('permit') || lowerType.includes('residence')) amlType = 'residence_permit';
+                else if (lowerType.includes('proof_address') || lowerType.includes('utility')) amlType = 'utility_bill';
+
+                // Upload to AMLBot
+                await uploadDocument({
+                    applicantId: applicant.id,
+                    documentType: amlType,
+                    fileName: doc.fileName || 'document.jpg',
+                    fileContent: fileBuffer,
+                });
+
+                console.log(`[Submit AMLBot] Uploaded ${doc.fileName} to AMLBot`);
+            } catch (dlError) {
+                console.error(`[Submit AMLBot] Failed to download/upload ${doc.fileName}:`, dlError);
+                // Continue to try other docs
+            }
+        } catch (err) {
+            console.error('[Submit AMLBot] Error processing document:', err);
+        }
+    }
+
+    // 6. Create verification request
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const callbackUrl = `${baseUrl}/api/webhooks/amlbot`;
 
     console.log('[Submit AMLBot] Creating verification with callback:', callbackUrl);
 
+    // If we have uploaded documents, we request 'document-verification'.
+    // If not, we still might, but it will likely fail as per user report.
     const verification = await createVerification({
       applicant_id: applicant.id,
       types: ['document-verification', 'aml-screening'],
       callback_url: callbackUrl,
     });
 
-    // 6. Update KYC record with AMLBot request ID
+    // 7. Update KYC record with AMLBot request ID
     if (kycRecord) {
       await supabaseAdmin
         .from('kyc_records')

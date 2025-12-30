@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proof of Personal Address</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 40px;
+            background: #fff;
+            border: 1px solid #ccc;
+        }
+        .header {
+            border-bottom: 2px solid #0056b3;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .company-logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0056b3;
+        }
+        .bill-info {
+            text-align: right;
+            font-size: 14px;
+        }
+        .customer-info {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .customer-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .customer-address {
+            color: #555;
+            line-height: 1.5;
+        }
+        .statement-summary {
+            margin-bottom: 30px;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .summary-table th {
+            text-align: left;
+            padding: 10px;
+            background: #0056b3;
+            color: #fff;
+        }
+        .summary-table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .footer {
+            margin-top: 50px;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .sample-watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 80px;
+            color: rgba(0,0,0,0.05);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="sample-watermark">SAMPLE</div>
+
+    <div class="header">
+        <div class="company-logo">City Electric Co.</div>
+        <div class="bill-info">
+            <strong>Statement Date:</strong> October 15, 2023<br>
+            <strong>Account Number:</strong> 9876543210
+        </div>
+    </div>
+
+    <div class="customer-info">
+        <div class="customer-name">John Doe</div>
+        <div class="customer-address">
+            123 Residential Street, Apt 4B<br>
+            Metropolis, NY 10012<br>
+            United States
+        </div>
+    </div>
+
+    <div class="statement-summary">
+        <h3>Statement Summary</h3>
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Period</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Electricity Services</td>
+                    <td>Sep 15 - Oct 15</td>
+                    <td>$45.50</td>
+                </tr>
+                <tr>
+                    <td>Transmission Charges</td>
+                    <td>Sep 15 - Oct 15</td>
+                    <td>$12.30</td>
+                </tr>
+                <tr>
+                    <td>State Tax</td>
+                    <td></td>
+                    <td>$4.20</td>
+                </tr>
+                <tr>
+                    <td><strong>Total Amount Due</strong></td>
+                    <td></td>
+                    <td><strong>$62.00</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 30px;">
+        <p><strong>Payment Due Date:</strong> November 01, 2023</p>
+    </div>
+
+    <div class="footer">
+        <p>City Electric Company | 555 Power Grid Ave, Metropolis, NY 10012 | Support: 1-800-555-0199</p>
+        <p>This is a sample proof of address document for testing purposes only.</p>
+    </div>
+</body>
+</html>

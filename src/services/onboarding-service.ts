@@ -215,10 +215,25 @@ export async function submitOnboarding(
         p_business_operations: sessionData.businessOperations || null,
         p_owners: sanitizedOwners,
         p_pep_screening: sessionData.pepScreening || null,
-        p_documents: (sessionData.documents || []).map((doc: any) => ({
-          ...doc,
-          type: doc.type === 'taxIdVerification' ? 'taxId' : doc.type,
-        })),
+        p_documents: (sessionData.documents || []).map((doc: any) => {
+          // Map frontend snake_case types to DB CamelCase constraint values
+          const DOCUMENT_TYPE_DB_MAP: Record<string, string> = {
+            'personal_id': 'idCard',
+            'proof_address': 'proofOfAddress',
+            'formation_doc': 'formationDocument',
+            'proof_of_registration': 'proofOfRegistration',
+            'proof_of_ownership': 'proofOfOwnership',
+            'bank_statement': 'bankStatement',
+            'tax_id': 'taxId',
+            'msb_cert': 'msbCert',
+            'taxIdVerification': 'taxId', // Legacy fallback
+          };
+
+          return {
+            ...doc,
+            type: DOCUMENT_TYPE_DB_MAP[doc.type] || doc.type,
+          };
+        }),
       p_metadata: {
         ...sessionData.metadata,
         submittedAt: new Date().toISOString(),

@@ -55,21 +55,26 @@ export const validateCountryNotRestricted = (countryCode: string): boolean => {
 };
 
 // Document types for different account types
+// Document types for different account types
 export const DOCUMENT_TYPES = {
   PERSONAL: [
-    'passport',
-    'driversLicenseFront',
-    'driversLicenseBack',
-    'idCard',
-    'idCardBack',
-    'proofOfAddress',
-    'selfie',
+    'personal_id',
+    'proof_address',
   ],
-  BUSINESS: ['formationDocument', 'proofOfRegistration'],
+  BUSINESS: [
+    'formation_doc',
+    'proof_of_registration',
+    'proof_of_ownership',
+    'bank_statement',
+    'tax_id',
+  ],
   FINTECH: [
-    'formationDocument',
-    'proofOfRegistration',
-    'msbCert', // Usually required for Fintechs
+    'formation_doc',
+    'proof_of_registration',
+    'msb_cert',
+    'proof_of_ownership',
+    'bank_statement',
+    'tax_id',
   ],
 } as const;
 
@@ -296,22 +301,11 @@ export const validateRequiredDocuments = (accountType: string, documents: any[])
   const normAccountType = accountType.toUpperCase();
   const uploadedTypes = new Set(documents.map(doc => doc.type));
 
-  if (normAccountType === 'PERSONAL') {
-    const hasIdentity =
-      uploadedTypes.has('passport') ||
-      (uploadedTypes.has('driversLicenseFront') && uploadedTypes.has('driversLicenseBack')) ||
-      (uploadedTypes.has('idCard') && uploadedTypes.has('idCardBack'));
-
-    const hasAddress = uploadedTypes.has('proofOfAddress');
-    const hasSelfie = uploadedTypes.has('selfie');
-
-    return hasIdentity && hasAddress && hasSelfie;
-  }
-
   const requiredTypes =
-    DOCUMENT_TYPES[accountType.toUpperCase() as keyof typeof DOCUMENT_TYPES] || [];
+    DOCUMENT_TYPES[normAccountType as keyof typeof DOCUMENT_TYPES] || [];
 
   // Check if all required document types are present
+  // For Personal, we now just check personal_id and proof_address
   return requiredTypes.every(requiredType => uploadedTypes.has(requiredType));
 };
 

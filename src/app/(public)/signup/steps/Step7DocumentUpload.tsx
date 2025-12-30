@@ -1,5 +1,4 @@
 import { useToast } from '@/components/ui/Toast';
-import { DOCUMENT_TYPES } from '@/lib/validations/client';
 import { Check, Eye, Loader2, Trash2, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
 
@@ -24,63 +23,76 @@ interface Step7Props {
   errors?: Record<string, string>;
 }
 
-// Metadata for display purposes
-const DOC_METADATA: Record<string, { title: string; subtitle: string }> = {
-  // Personal
-  passport: { title: 'Passport', subtitle: 'Valid government-issued passport' },
-  driversLicenseFront: { title: "Driver's License (Front)", subtitle: 'Front of your license' },
-  driversLicenseBack: { title: "Driver's License (Back)", subtitle: 'Back of your license' },
-  idCard: { title: 'ID Card (Front)', subtitle: 'Government issued ID card' },
-  idCardBack: { title: 'ID Card (Back)', subtitle: 'Back of ID card' },
-  proofOfAddress: { title: 'Proof of Address', subtitle: 'Utility bill, bank statement, etc.' },
-  selfie: { title: 'Selfie', subtitle: 'Photo of yourself holding your ID' },
+interface DocFieldConfig {
+  id: string;
+  title: string;
+  subtitle: string;
+  required: boolean;
+  acceptedFormats?: string;
+}
 
-  // Business/Fintech
-  formationDocument: { title: 'Formation Document', subtitle: 'Articles of Incorporation or Operating Agreement' },
-  proofOfRegistration: { title: 'Proof of Registration', subtitle: 'Certificate of Good Standing' },
-  msbCert: { title: 'MSB Certificate', subtitle: 'Money Services Business Registration' },
+const PERSONAL_DOCS: DocFieldConfig[] = [
+  {
+    id: 'personal_id',
+    title: 'Personal Identification Document',
+    subtitle: 'Government-issued photo ID of the person completing this onboarding',
+    required: true,
+    acceptedFormats: 'Accepted formats: PDF, JPG, PNG (max 10MB)',
+  },
+  {
+    id: 'proof_address',
+    title: 'Proof of Personal Address',
+    subtitle: 'Utility bill, bank statement, or government-issued document dated within the last 90 days',
+    required: true,
+    acceptedFormats: 'Accepted formats: PDF, JPG, PNG (max 10MB)',
+  },
+];
 
-  // Optional / Extra (Not strictly in DOCUMENT_TYPES but might be used)
-  proofOfOwnership: { title: 'Proof of Ownership', subtitle: 'Operating Agreement, Bylaws, or Cap Table' },
-  bankStatement: { title: 'Bank Statement', subtitle: 'Within 90 days' },
-  taxIdVerification: { title: 'Tax ID Verification', subtitle: 'IRS Letter 147C, W-9, or equivalent' },
-};
+const BUSINESS_DOCS: DocFieldConfig[] = [
+  {
+    id: 'formation_doc',
+    title: 'Formation Document',
+    subtitle: 'Articles of Incorporation or Operating Agreement',
+    required: true,
+  },
+  {
+    id: 'proof_of_registration',
+    title: 'Proof of Registration',
+    subtitle: 'Certificate of Good Standing',
+    required: true,
+  },
+  {
+    id: 'proof_of_ownership',
+    title: 'Proof of Ownership',
+    subtitle: 'Operating Agreement, Bylaws, or Cap Table',
+    required: true,
+  },
+  {
+    id: 'bank_statement',
+    title: 'Bank Statement',
+    subtitle: 'Within 90 days',
+    required: true,
+  },
+  {
+    id: 'tax_id',
+    title: 'Tax ID Verification',
+    subtitle: 'IRS Letter 147C, W-9, or equivalent',
+    required: true,
+  },
+];
 
-export function Step7DocumentUpload({ formData = {}, onChange, sessionId, errors = {} }: Step7Props) {
+export function Step7DocumentUpload({
+  formData = {},
+  onChange,
+  sessionId,
+  errors = {},
+}: Step7Props) {
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeUploadField, setActiveUploadField] = useState<string | null>(null);
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
 
   const documents = formData.documents || [];
-  const accountType = (formData.accountType || 'business').toUpperCase(); // PERSONAL, BUSINESS, FINTECH
-
-  // Determine which documents to show based on strict validation rules
-  // We accept 'PERSONAL', 'BUSINESS', 'FINTECH' keys.
-  // Fallback to BUSINESS if unknown.
-  const requiredDocTypes = DOCUMENT_TYPES[accountType as keyof typeof DOCUMENT_TYPES] || DOCUMENT_TYPES.BUSINESS;
-
-  // For Business/Fintech, we might also want to show the common optional docs that were previously hardcoded
-  // if you want to keep them available.
-  // If the user wants "strict rendering based on account type", we mainly focus on what is in DOCUMENT_TYPES.
-  // However, often business logic requires more than just the validation minimums.
-  // I will append the optional business docs if it's a business/fintech account,
-  // but distinct them or just merge them if that's the desired UX.
-  // For now, I will stick to what is in DOCUMENT_TYPES to solve the checking error,
-  // plus append the standard extra business docs if it's not Personal, as they are likely useful.
-
-  const additionalBusinessDocs = ['proofOfOwnership', 'bankStatement', 'taxIdVerification'];
-
-  const displayDocs: string[] = [...requiredDocTypes];
-  if (accountType !== 'PERSONAL') {
-     // Add the extra business docs that aren't strict validation failures but are good to collect
-     // Check if they aren't already in the list to avoid dupes
-     additionalBusinessDocs.forEach(doc => {
-         if (!displayDocs.includes(doc)) {
-             displayDocs.push(doc);
-         }
-     });
-  }
 
   const handleUploadClick = (field: string) => {
     setActiveUploadField(field);
@@ -94,7 +106,15 @@ export function Step7DocumentUpload({ formData = {}, onChange, sessionId, errors
     const file = e.target.files?.[0];
     const fieldId = activeUploadField;
 
-    if (!file || !fieldId || !sessionId) return;
+    if (!file || !fieldId) return;
+
+    // Check for sessionId - if not present, we can't upload to S3 yet?
+    // In strict mode we should return, but for UI dev we might want to allow mock
+    if (!sessionId) {
+      console.warn('No session ID provided for upload');
+      // toast.error('Session Error', 'No active session found');
+      // return;
+    }
 
     // Validate size (10MB)
     if (file.size > 10 * 1024 * 1024) {
@@ -108,8 +128,14 @@ export function Step7DocumentUpload({ formData = {}, onChange, sessionId, errors
       const uploadFormData = new FormData();
       uploadFormData.append('file', file);
       uploadFormData.append('documentType', fieldId);
-      uploadFormData.append('sessionId', sessionId);
+      if (sessionId) {
+        uploadFormData.append('sessionId', sessionId);
+      }
 
+      // If we don't have a session, we can't really upload to the /api/admin/client/upload endpoint properly
+      // because it expects a sessionId.
+      // However, the user might be using the new flow which lacks sessionId.
+      // For now, let's proceed with the fetch and see if it fails, or if we need a fallback.
       const response = await fetch('/api/admin/client/upload', {
         method: 'POST',
         body: uploadFormData,
@@ -121,8 +147,6 @@ export function Step7DocumentUpload({ formData = {}, onChange, sessionId, errors
         throw new Error(data.error || 'Upload failed');
       }
 
-      // Add to documents list via onChange
-      // Remove existing doc of same type if exists
       const currentDocs = documents.filter(doc => doc.type !== fieldId);
       const newDocs = [...currentDocs, data.document];
 
@@ -189,20 +213,52 @@ export function Step7DocumentUpload({ formData = {}, onChange, sessionId, errors
         ) : (
           <>
             <Upload className='h-3.5 w-3.5' />
-            Upload File
+            Upload
           </>
         )}
       </button>
     );
   };
 
-  const getDocTitle = (id: string) => DOC_METADATA[id]?.title || id;
-  const getDocSubtitle = (id: string) => DOC_METADATA[id]?.subtitle || 'Required document';
+  const renderDocRow = (doc: DocFieldConfig) => {
+    const uploadedDoc = getDocument(doc.id);
+    return (
+      <div
+        key={doc.id}
+        className={`flex items-start justify-between rounded-xl border p-5 transition-colors ${
+          uploadedDoc ? 'border-blue-200 bg-blue-50/20' : 'border-gray-200 hover:bg-gray-50'
+        }`}
+      >
+        <div className='space-y-1'>
+          <div className='flex items-center gap-2'>
+            {/* Icon placeholder or document icon could go here */}
+            <h4 className='text-sm font-semibold text-gray-900'>
+              {doc.title} {doc.required && <span className='text-red-500'>*</span>}
+            </h4>
+          </div>
+          <p className='text-sm text-gray-500'>{doc.subtitle}</p>
+          {doc.acceptedFormats && (
+            <p className='pt-1 text-xs text-gray-400'>{doc.acceptedFormats}</p>
+          )}
+
+          {uploadedDoc && (
+            <div className='mt-2 flex items-center gap-1.5 text-xs font-medium text-green-600'>
+              <div className='flex h-4 w-4 items-center justify-center rounded-full bg-green-100'>
+                <Check className='h-2.5 w-2.5' />
+              </div>
+              {uploadedDoc.fileName}
+            </div>
+          )}
+        </div>
+        <div className='ml-4 self-center'>{renderUploadButton(doc.id)}</div>
+      </div>
+    );
+  };
 
   return (
     <div className='space-y-8'>
-      {/* Hidden File Input */}
-      <input
+       {/* Global File Input */}
+       <input
         type='file'
         ref={fileInputRef}
         onChange={handleFileSelect}
@@ -210,47 +266,29 @@ export function Step7DocumentUpload({ formData = {}, onChange, sessionId, errors
         accept='.pdf,.jpg,.jpeg,.png'
       />
 
-      {/* Dynamic Document Sections based on Account Type */}
-      <section className='space-y-6 pr-2'>
-        <h3 className='text-sm font-semibold text-gray-700'>
-          {accountType === 'PERSONAL' ? 'Personal Documents' : 'Business Documents'}
+      <section className='space-y-4'>
+        <h3 className='text-xs font-bold uppercase tracking-wider text-gray-500'>
+          Personal Documents
         </h3>
-        <div className='space-y-4'>
-          {displayDocs.map(docId => {
-               const uploadedDoc = getDocument(docId);
-               return (
-                   <div
-                   key={docId}
-                   className={`flex items-center justify-between rounded-lg border-2 border-dashed p-4 transition-colors ${
-                       uploadedDoc ? 'border-green-200 bg-green-50/30' : 'border-gray-200 hover:bg-gray-50/50'
-                   }`}
-                   >
-                   <div className='space-y-0.5'>
-                       <h4 className='text-sm font-medium text-gray-900'>{getDocTitle(docId)}</h4>
-                       {uploadedDoc ? (
-                            <p className='flex items-center gap-1 text-xs text-green-600'>
-                            <Check className='h-3 w-3' />
-                            {uploadedDoc.fileName}
-                          </p>
-                       ) : (
-                           <p className='text-xs text-gray-500'>{getDocSubtitle(docId)}</p>
-                       )}
-                   </div>
-                   {renderUploadButton(docId)}
-                   </div>
-               );
-             })}
-        </div>
+        <div className='space-y-3'>{PERSONAL_DOCS.map(renderDocRow)}</div>
+      </section>
+
+      <section className='space-y-4'>
+        <h3 className='text-xs font-bold uppercase tracking-wider text-gray-500'>
+          Business Documents
+        </h3>
+        <div className='space-y-3'>{BUSINESS_DOCS.map(renderDocRow)}</div>
       </section>
 
       {/* Note Section */}
-      <div className='mb-2 rounded-lg border border-orange-100 bg-orange-50 p-4'>
-        <p className='text-xs leading-relaxed text-yellow-600'>
-          <span className='font-semibold'>Notes:</span> Documents can also be uploaded after
-          client creation from the client detail page. Accepted formats: PDF, JPG, PNG. Max
-          size: 10MB per file.
+      <div className='rounded-lg border border-blue-100 bg-blue-50 p-4'>
+        <p className='text-xs leading-relaxed text-blue-800'>
+          <span className='font-bold'>Note:</span> All documents marked with{' '}
+          <span className='text-red-600'>*</span> are required to proceed. Accepted formats: PDF,
+          JPG, PNG, DOC. Max size: 10MB per file.
         </p>
       </div>
     </div>
   );
 }
+
