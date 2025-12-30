@@ -41,69 +41,73 @@ export function AddRepresentativeModal({ isOpen, onClose, clientId, onSuccess }:
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
+  const handleSubmit = () => {
+    return
+  }
 
-    try {
-      // Prepare the data for API submission
-      const submissionData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        dob: formData.dob,
-        phoneCountry: formData.phoneCountry,
-        phoneNumber: formData.phoneNumber,
-        title: formData.title,
-        ownershipPercentage: parseFloat(formData.ownershipPercentage) || 0,
-        employmentStatus: formData.employmentStatus,
-        occupation: formData.occupation,
-        employer: formData.employer,
-        annualIncome: formData.annualIncome,
-        taxId: formData.taxId,
-        sourceOfFunds: formData.sourceOfFunds,
-        sourceOfWealth: formData.sourceOfWealth,
-      };
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setIsSubmitting(true);
+  //   setError(null);
 
-      const response = await adminClientApi.addRepresentative(clientId, submissionData);
+  //   try {
+  //     // Prepare the data for API submission
+  //     const submissionData = {
+  //       firstName: formData.firstName,
+  //       lastName: formData.lastName,
+  //       email: formData.email,
+  //       dob: formData.dob,
+  //       phoneCountry: formData.phoneCountry,
+  //       phoneNumber: formData.phoneNumber,
+  //       title: formData.title,
+  //       ownershipPercentage: parseFloat(formData.ownershipPercentage) || 0,
+  //       employmentStatus: formData.employmentStatus,
+  //       occupation: formData.occupation,
+  //       employer: formData.employer,
+  //       annualIncome: formData.annualIncome,
+  //       taxId: formData.taxId,
+  //       sourceOfFunds: formData.sourceOfFunds,
+  //       sourceOfWealth: formData.sourceOfWealth,
+  //     };
 
-      if (response.success) {
-        // Reset form
-        setFormData({
-          firstName: '',
-          lastName: '',
-          email: '',
-          dob: '',
-          phoneCountry: 'US',
-          phoneNumber: '',
-          title: '',
-          ownershipPercentage: '',
-          employmentStatus: '',
-          occupation: '',
-          employer: '',
-          annualIncome: '',
-          taxId: '',
-          sourceOfFunds: '',
-          sourceOfWealth: '',
-        });
+  //     // const response = await adminClientApi.addRepresentative(clientId, submissionData);
 
-        // Call onSuccess callback if provided
-        if (onSuccess) {
-          onSuccess();
-        }
+  //     if (response.success) {
+  //       // Reset form
+  //       setFormData({
+  //         firstName: '',
+  //         lastName: '',
+  //         email: '',
+  //         dob: '',
+  //         phoneCountry: 'US',
+  //         phoneNumber: '',
+  //         title: '',
+  //         ownershipPercentage: '',
+  //         employmentStatus: '',
+  //         occupation: '',
+  //         employer: '',
+  //         annualIncome: '',
+  //         taxId: '',
+  //         sourceOfFunds: '',
+  //         sourceOfWealth: '',
+  //       });
 
-        onClose();
-      } else {
-        setError(response.error || 'Failed to add representative');
-      }
-    } catch (error: any) {
-      console.error('Error adding representative:', error);
-      setError(error.message || 'An unexpected error occurred');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  //       // Call onSuccess callback if provided
+  //       if (onSuccess) {
+  //         onSuccess();
+  //       }
+
+  //       onClose();
+  //     } else {
+  //       setError(response.error || 'Failed to add representative');
+  //     }
+  //   } catch (error: any) {
+  //     console.error('Error adding representative:', error);
+  //     setError(error.message || 'An unexpected error occurred');
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
 
   const employmentStatusOptions = [
     { value: 'employed', label: 'Employed' },
