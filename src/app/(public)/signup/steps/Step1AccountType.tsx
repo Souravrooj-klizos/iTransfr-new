@@ -16,18 +16,21 @@ export function Step1AccountType({ selectedType, onSelect }: Step1Props) {
       title: 'Personal Account',
       description: 'Individual client requiring USD virtual account',
       icon: User,
+      disabled: true,
     },
     {
       id: 'business',
       title: 'Business Account',
       description: 'Importers, Exporters, Agencies and General Commerce',
       icon: Building2,
+      disabled: false,
     },
     {
       id: 'fintech',
       title: 'Fintech / EDD',
       description: 'MSBs, Payment Processors and Crypto Entities',
       icon: Shield,
+      disabled: true,
     },
   ];
 
@@ -40,11 +43,14 @@ export function Step1AccountType({ selectedType, onSelect }: Step1Props) {
         return (
           <div
             key={option.id}
-            onClick={() => onSelect?.(option.id)}
+            onClick={() => !option.disabled && onSelect?.(option.id)}
             className={cn(
-              'cursor-pointer rounded-xl border p-6 transition-all hover:border-blue-300',
+              'rounded-xl border p-6 transition-all',
+              option.disabled
+                ? 'cursor-not-allowed opacity-70 blur-[0.5px]'
+                : 'cursor-pointer hover:border-blue-300',
               isSelected
-                ? 'border-blue-500 bg-blue-50/50 border-2 transition-all'
+                ? 'border-2 border-blue-500 bg-blue-50/50 transition-all'
                 : 'border-gray-200 bg-white hover:bg-gray-50'
             )}
           >
@@ -56,8 +62,22 @@ export function Step1AccountType({ selectedType, onSelect }: Step1Props) {
             >
               <Icon className='h-5 w-5' />
             </div>
-            <h3 className='mb-2 font-medium text-gray-900'>{option.title}</h3>
-            <p className='text-xs leading-relaxed text-gray-500'>{option.description}</p>
+            <h3
+              className={cn(
+                'mb-2 font-medium',
+                option.disabled ? 'text-gray-400' : 'text-gray-900'
+              )}
+            >
+              {option.title}
+            </h3>
+            <p
+              className={cn(
+                'text-xs leading-relaxed',
+                option.disabled ? 'text-gray-400' : 'text-gray-500'
+              )}
+            >
+              {option.description}
+            </p>
           </div>
         );
       })}

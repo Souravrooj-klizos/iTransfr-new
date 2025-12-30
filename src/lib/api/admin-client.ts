@@ -728,46 +728,6 @@ export const adminClientApi = {
     const response = await adminAxios.get(`/client/${clientId}/owners`);
     return response.data;
   },
-
-  // Add Representative
-  async addRepresentative(
-    clientId: string,
-    representativeData: {
-      firstName: string;
-      lastName: string;
-      email: string;
-      dob?: string;
-      phoneCountry?: string;
-      phoneNumber?: string;
-      title?: string;
-      ownershipPercentage: number;
-      employmentStatus?: string;
-      occupation: string;
-      employer?: string;
-      annualIncome?: string;
-      taxId?: string;
-      sourceOfFunds?: string;
-      sourceOfWealth?: string;
-    }
-  ): Promise<{
-    success: boolean;
-    message?: string;
-    representative?: BeneficialOwner;
-    error?: string;
-  }> {
-    const response = await adminAxios.post<{
-      success: boolean;
-      message?: string;
-      representative?: BeneficialOwner;
-      error?: string;
-    }>(`/client/${clientId}/representatives`, representativeData);
-
-    if (!response.data) {
-      throw new Error('Invalid API response: missing data in add representative');
-    }
-
-    return response.data;
-  },
 };
 
 // =====================================================

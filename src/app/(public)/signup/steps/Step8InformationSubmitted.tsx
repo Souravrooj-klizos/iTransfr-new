@@ -46,7 +46,7 @@ export function Step8InformationSubmitted({ formData = {}, onChange, errors = {}
       </section>
 
       {/* Footer Section */}
-      <section className='space-y-8 border-t border-gray-100 pt-8 text-center'>
+      {/* <section className='space-y-8 border-t border-gray-100 pt-8 text-center'>
         <p className='text-xs text-gray-600'>
           If we need anything further, our team will contact you using the email address provided during onboarding.
         </p>
@@ -54,7 +54,7 @@ export function Step8InformationSubmitted({ formData = {}, onChange, errors = {}
         <button className='rounded-lg border border-gray-200 bg-white px-6 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900'>
           You may safely close this tab
         </button>
-      </section>
+      </section> */}
     </div>
   );
 }

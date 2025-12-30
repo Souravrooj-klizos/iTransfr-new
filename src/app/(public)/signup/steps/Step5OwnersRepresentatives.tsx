@@ -383,22 +383,7 @@ export function Step5OwnersRepresentatives({
           </p>
 
           {/* Validation Errors */}
-          {!ownershipValidation.isValid && ownershipValidation.error && (
-            <p className='mt-2 text-sm text-red-600'>{ownershipValidation.error}</p>
-          )}
-
-          {/* Field Errors */}
-          {validationErrors.length > 0 && (
-            <div className='mt-2'>
-              <p className='text-sm font-medium text-red-600'>Validation Errors:</p>
-              <ul className='mt-1 list-inside list-disc text-sm text-red-600'>
-                {validationErrors.slice(0, 3).map((error, index) => (
-                  <li key={index}>{error}</li>
-                ))}
-                {validationErrors.length > 3 && <li>...and {validationErrors.length - 3} more</li>}
-              </ul>
-            </div>
-          )}
+       
         </div>
         {/* Total Ownership Card */}
 

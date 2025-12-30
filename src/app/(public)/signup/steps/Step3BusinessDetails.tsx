@@ -1,6 +1,7 @@
 import { Select } from '@/components/ui';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/TextArea';
+import { EXPECTED_MONTHLY_VOLUMES, INDUSTRIES, PRIMARY_USE_CASES } from '@/lib/constants/business';
 
 interface Step3Props {
   formData?: any;
@@ -9,25 +10,6 @@ interface Step3Props {
 }
 
 const Step3BusinessDetails = ({ formData, onChange, errors = {} }: Step3Props) => {
-  const industryOptions = [
-    { value: 'retail', label: 'Retail' },
-    { value: 'e-commerce', label: 'E-commerce' },
-    { value: 'wholesale', label: 'Wholesale' },
-    { value: 'other', label: 'Other' },
-  ];
-
-  const primaryUseCaseOptions = [
-    { value: 'payment_processing', label: 'Payment Processing' },
-    { value: 'online_transactions', label: 'Online Transactions' },
-    { value: 'cash_management', label: 'Cash Management' },
-  ];
-
-  const expectedMonthlyVolumeOptions = [
-    { value: 'low', label: 'Low' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'high', label: 'High' },
-  ];
-
   return (
     <div className='space-y-6'>
       {/* Row 1 */}
@@ -39,7 +21,7 @@ const Step3BusinessDetails = ({ formData, onChange, errors = {} }: Step3Props) =
           <Select
             value={formData.industry || ''}
             onChange={val => onChange?.('industry', val)}
-            options={industryOptions}
+            options={INDUSTRIES}
             placeholder='Select Industry'
             error={errors.industry}
           />
@@ -79,7 +61,7 @@ const Step3BusinessDetails = ({ formData, onChange, errors = {} }: Step3Props) =
           <Select
             value={formData.expectedMonthlyVolume || ''}
             onChange={val => onChange?.('expectedMonthlyVolume', val)}
-            options={expectedMonthlyVolumeOptions}
+            options={EXPECTED_MONTHLY_VOLUMES}
             placeholder='Select range'
             direction='up'
             error={errors.expectedMonthlyVolume}
@@ -90,7 +72,7 @@ const Step3BusinessDetails = ({ formData, onChange, errors = {} }: Step3Props) =
           <Select
             value={formData.primaryUseCase || ''}
             onChange={val => onChange?.('primaryUseCase', val)}
-            options={primaryUseCaseOptions}
+            options={PRIMARY_USE_CASES}
             placeholder='Select use case'
             direction='up'
             error={errors.primaryUseCase}
