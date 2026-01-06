@@ -470,6 +470,7 @@ export default function ClientsPage() {
             formData={clientFormData}
             onChange={updateClientFormData}
             errors={validationErrors}
+            sessionId={sessionId}
           />
         );
       default:

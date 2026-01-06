@@ -48,8 +48,9 @@ BEGIN
   IF p_created_by = 'admin' THEN
     -- Generate a temporary email for admin-created clients
     -- In production, you might want to collect actual email or use different auth approach
-    INSERT INTO auth.users (email, encrypted_password, email_confirmed_at, created_at, updated_at)
+    INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, created_at, updated_at)
     VALUES (
+      gen_random_uuid(),
       'admin-created-' || gen_random_uuid() || '@itransfr.internal',
       crypt(gen_random_uuid()::text, gen_salt('bf')),
       NOW(),
@@ -89,8 +90,8 @@ BEGIN
   ) VALUES (
     v_client_id,
     p_account_type,
-    CASE WHEN p_account_type = 'personal' THEN (p_owners->0->>'firstName') ELSE NULL END,
-    CASE WHEN p_account_type = 'personal' THEN (p_owners->0->>'lastName') ELSE NULL END,
+    CASE WHEN p_account_type = 'personal' THEN (p_owners->0->>'firstName') ELSE 'N/A' END,
+    CASE WHEN p_account_type = 'personal' THEN (p_owners->0->>'lastName') ELSE 'N/A' END,
     CASE WHEN p_account_type IN ('business', 'fintech') THEN p_business_name ELSE NULL END,
     CASE WHEN p_account_type IN ('business', 'fintech') THEN p_entity_type ELSE NULL END,
     p_tax_id,
@@ -271,6 +272,7 @@ BEGIN
   FOR v_owner_record IN SELECT * FROM jsonb_array_elements(p_owners)
   LOOP
     IF (v_owner_record.value->>'type') = 'person' THEN
+      -- Insert PEP responses from the pepResponses object
       INSERT INTO pep_screening_responses (
         "ownerId",
         question_id,
@@ -278,39 +280,15 @@ BEGIN
         details,
         screened_at,
         created_at
-      ) VALUES
-      (
+      )
+      SELECT
         (SELECT id FROM beneficial_owners WHERE "clientId" = v_client_id AND email = v_owner_record.value->>'email' LIMIT 1),
-        'pep_senior_official',
-        (p_pep_screening->>'isPEPSeniorOfficial')::BOOLEAN,
-        CASE WHEN (p_pep_screening->>'isPEPSeniorOfficial')::BOOLEAN THEN 'PEP senior official identified' ELSE NULL END,
+        pep.key,
+        (pep.value)::BOOLEAN,
+        CASE WHEN (pep.value)::BOOLEAN THEN 'PEP identified' ELSE NULL END,
         NOW(),
         NOW()
-      ),
-      (
-        (SELECT id FROM beneficial_owners WHERE "clientId" = v_client_id AND email = v_owner_record.value->>'email' LIMIT 1),
-        'pep_political_party',
-        (p_pep_screening->>'isPEPPoliticalParty')::BOOLEAN,
-        CASE WHEN (p_pep_screening->>'isPEPPoliticalParty')::BOOLEAN THEN 'PEP political party official identified' ELSE NULL END,
-        NOW(),
-        NOW()
-      ),
-      (
-        (SELECT id FROM beneficial_owners WHERE "clientId" = v_client_id AND email = v_owner_record.value->>'email' LIMIT 1),
-        'pep_family_member',
-        (p_pep_screening->>'isPEPFamilyMember')::BOOLEAN,
-        CASE WHEN (p_pep_screening->>'isPEPFamilyMember')::BOOLEAN THEN 'PEP family member identified' ELSE NULL END,
-        NOW(),
-        NOW()
-      ),
-      (
-        (SELECT id FROM beneficial_owners WHERE "clientId" = v_client_id AND email = v_owner_record.value->>'email' LIMIT 1),
-        'pep_close_associate',
-        (p_pep_screening->>'isPEPCloseAssociate')::BOOLEAN,
-        CASE WHEN (p_pep_screening->>'isPEPCloseAssociate')::BOOLEAN THEN 'PEP close associate identified' ELSE NULL END,
-        NOW(),
-        NOW()
-      );
+      FROM jsonb_each(p_pep_screening->'pepResponses') AS pep;
     END IF;
   END LOOP;
 

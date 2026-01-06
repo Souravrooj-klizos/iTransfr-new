@@ -1,8 +1,9 @@
 import {
-    SUPPORTED_COUNTRIES,
-    getEntityTypesForCountry,
-    hasStateDropdown,
+  SUPPORTED_COUNTRIES,
+  getEntityTypesForCountry,
+  hasStateDropdown,
 } from '@/lib/constants/countries';
+import { PEP_QUESTIONS, FUND_ORIGIN_QUESTION } from '@/lib/constants/pep';
 import { z } from 'zod';
 
 // Create country codes array for Zod enum
@@ -99,13 +100,24 @@ export const step3Schema = z.object({
 
 // Step 4: Volume & Operations
 export const step4Schema = z.object({
-  volumeSwiftMonthly: z.number().min(0).optional(),
-  volumeLocalMonthly: z.number().min(0).optional(),
-  volumeCryptoMonthly: z.number().min(0).optional(),
-  volumeInternationalTxCount: z.number().min(0).optional(),
-  volumeLocalTxCount: z.number().min(0).optional(),
-  operatingCurrencies: z.array(z.string()).min(1, 'At least one operating currency required'),
-  primaryOperatingRegions: z.array(z.string()).min(1, 'At least one operating region required'),
+  // Volume amounts (string values from dropdown selections)
+  volumeSwift: z.string().optional(),
+  volumeLocal: z.string().optional(),
+  volumeCrypto: z.string().optional(),
+  volumeFiatConversion: z.string().optional(),
+  // Transaction counts (string values from dropdown selections)
+  volumeInternationalCnt: z.string().optional(),
+  volumeLocalCnt: z.string().optional(),
+  // Currencies (multi-select array) - default to empty array if undefined
+  currencies: z.array(z.string()).default([]).refine(
+    (arr) => arr.length >= 1,
+    { message: 'At least one currency is required' }
+  ),
+  // Regions (multi-select array) - default to empty array if undefined
+  regions: z.array(z.string()).default([]).refine(
+    (arr) => arr.length >= 1,
+    { message: 'At least one operating region is required' }
+  ),
 });
 
 // Step 5: Owners & Representatives
@@ -207,13 +219,24 @@ export const step5Schema = z.object({
 
 // Step 6: PEP & Sanctions Screening
 export const step6Schema = z.object({
-  pepScreening: z.object({
-    isPEPSeniorOfficial: z.boolean(),
-    isPEPPoliticalParty: z.boolean(),
-    isPEPFamilyMember: z.boolean(),
-    isPEPCloseAssociate: z.boolean(),
-    additionalNotes: z.string().optional(),
-  }),
+  pepResponses: z.record(z.boolean()).refine(
+    (responses) => {
+      // Must answer all standard PEP questions
+      const allQuestionsAnswered = PEP_QUESTIONS.every((q) => responses[q.id] !== undefined);
+      if (!allQuestionsAnswered) return false;
+
+      // If any PEP question is Yes, must answer Fund Origin question
+      const hasPepFlag = PEP_QUESTIONS.some((q) => responses[q.id] === true);
+      if (hasPepFlag) {
+        return responses[FUND_ORIGIN_QUESTION.id] !== undefined;
+      }
+
+      return true;
+    },
+    {
+      message: 'Please answer all required questions',
+    }
+  ),
 });
 
 // Step 7: Document Upload
@@ -249,7 +272,7 @@ export const completeClientSchema = z.object({
   businessDetails: step3Schema,
   businessOperations: step4Schema,
   owners: step5Schema.shape.owners,
-  pepScreening: step6Schema.shape.pepScreening,
+  pepResponses: step6Schema.shape.pepResponses,
   documents: step7Schema.shape.documents,
   finalConfirmation: step8Schema,
 });

@@ -36,10 +36,11 @@ export default function NewSignupPage() {
     volumeSwift: '',
     volumeLocal: '',
     volumeCrypto: '',
+    volumeFiatConversion: '',
     volumeInternationalCnt: '',
     volumeLocalCnt: '',
     currencies: [],
-    region: '',
+    regions: [],
     // Step 5
     ownershipPercentage: '',
     ownerFirstName: '',
@@ -69,10 +70,8 @@ export default function NewSignupPage() {
     sourceOfIncome: '',
     annualIncome: '',
     // Step 6
-    isPEPSeniorOfficial: null,
-    isPEPPoliticalParty: null,
-    isPEPFamilyMember: null,
-    isPEPCloseAssociate: null,
+    // Step 6
+    pepResponses: {},
   });
 
   const handleNext = () => {
@@ -111,9 +110,17 @@ export default function NewSignupPage() {
       case 6:
         return <Step6PEPSanctionsScreening formData={formData} onChange={updateFormData} />;
       case 7:
-        return <Step7DocumentUpload formData={formData} onChange={updateFormData} sessionId={null} />;
+        return (
+          <Step7DocumentUpload formData={formData} onChange={updateFormData} sessionId={null} />
+        );
       case 8:
-        return <Step8InformationSubmitted formData={formData} onChange={updateFormData} />;
+        return (
+          <Step8InformationSubmitted
+            formData={formData}
+            onChange={updateFormData}
+            sessionId={null}
+          />
+        );
       default:
         return (
           <div className='flex h-40 items-center justify-center text-gray-500'>

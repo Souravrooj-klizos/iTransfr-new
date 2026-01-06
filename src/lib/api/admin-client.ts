@@ -38,13 +38,14 @@ export interface Step3Data {
 }
 
 export interface Step4Data {
-  volumeSwiftMonthly?: number;
-  volumeLocalMonthly?: number;
-  volumeCryptoMonthly?: number;
-  volumeInternationalTxCount?: number;
-  volumeLocalTxCount?: number;
-  operatingCurrencies: string[];
-  primaryOperatingRegions: string[];
+  volumeSwift?: string;
+  volumeLocal?: string;
+  volumeCrypto?: string;
+  volumeFiatConversion?: string;
+  volumeInternationalCnt?: string;
+  volumeLocalCnt?: string;
+  currencies: string[];
+  regions: string[];
 }
 
 export interface PersonOwner {
@@ -99,11 +100,7 @@ export interface Step5Data {
 
 export interface Step6Data {
   pepScreening: {
-    isPEPSeniorOfficial: boolean;
-    isPEPPoliticalParty: boolean;
-    isPEPFamilyMember: boolean;
-    isPEPCloseAssociate: boolean;
-    additionalNotes?: string;
+    pepResponses: Record<string, boolean>;
   };
 }
 

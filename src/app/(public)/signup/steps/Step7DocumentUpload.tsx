@@ -33,14 +33,14 @@ interface DocFieldConfig {
 
 const PERSONAL_DOCS: DocFieldConfig[] = [
   {
-    id: 'personal_id',
+    id: 'personalId',
     title: 'Personal Identification Document',
     subtitle: 'Government-issued photo ID of the person completing this onboarding',
     required: true,
     acceptedFormats: 'Accepted formats: PDF, JPG, PNG (max 10MB)',
   },
   {
-    id: 'proof_address',
+    id: 'proofOfAddress',
     title: 'Proof of Personal Address',
     subtitle: 'Utility bill, bank statement, or government-issued document dated within the last 90 days',
     required: true,
@@ -50,31 +50,31 @@ const PERSONAL_DOCS: DocFieldConfig[] = [
 
 const BUSINESS_DOCS: DocFieldConfig[] = [
   {
-    id: 'formation_doc',
+    id: 'formationDocument',
     title: 'Formation Document',
     subtitle: 'Articles of Incorporation or Operating Agreement',
     required: true,
   },
   {
-    id: 'proof_of_registration',
+    id: 'proofOfRegistration',
     title: 'Proof of Registration',
     subtitle: 'Certificate of Good Standing',
     required: true,
   },
   {
-    id: 'proof_of_ownership',
+    id: 'proofOfOwnership',
     title: 'Proof of Ownership',
     subtitle: 'Operating Agreement, Bylaws, or Cap Table',
     required: true,
   },
   {
-    id: 'bank_statement',
+    id: 'bankStatement',
     title: 'Bank Statement',
     subtitle: 'Within 90 days',
     required: true,
   },
   {
-    id: 'tax_id',
+    id: 'taxId',
     title: 'Tax ID Verification',
     subtitle: 'IRS Letter 147C, W-9, or equivalent',
     required: true,
@@ -225,9 +225,8 @@ export function Step7DocumentUpload({
     return (
       <div
         key={doc.id}
-        className={`flex items-start justify-between rounded-xl border p-5 transition-colors ${
-          uploadedDoc ? 'border-blue-200 bg-blue-50/20' : 'border-gray-200 hover:bg-gray-50'
-        }`}
+        className={`flex items-start justify-between rounded-xl border p-5 transition-colors ${uploadedDoc ? 'border-blue-200 bg-blue-50/20' : 'border-gray-200 hover:bg-gray-50'
+          }`}
       >
         <div className='space-y-1'>
           <div className='flex items-center gap-2'>
@@ -257,8 +256,8 @@ export function Step7DocumentUpload({
 
   return (
     <div className='space-y-8'>
-       {/* Global File Input */}
-       <input
+      {/* Global File Input */}
+      <input
         type='file'
         ref={fileInputRef}
         onChange={handleFileSelect}

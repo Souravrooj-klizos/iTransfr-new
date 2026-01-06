@@ -169,9 +169,8 @@ export async function POST(request: NextRequest) {
 
                 if (lowerType.includes('passport')) amlType = 'passport';
                 else if (lowerType.includes('driver') || lowerType.includes('license')) amlType = 'drivers_license';
-                else if (lowerType.includes('id_card') || lowerType.includes('id card') || lowerType === 'personal_id') amlType = 'national_id';
+                else if (lowerType.includes('id_card') || lowerType.includes('id card')) amlType = 'national_id';
                 else if (lowerType.includes('permit') || lowerType.includes('residence')) amlType = 'residence_permit';
-                else if (lowerType.includes('proof_address') || lowerType.includes('utility')) amlType = 'utility_bill';
 
                 // Upload to AMLBot
                 await uploadDocument({

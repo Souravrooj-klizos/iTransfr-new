@@ -33,16 +33,17 @@ export async function POST(request: NextRequest) {
     const data = validationResult.data;
 
     // 3. Save via Service
-    const result = await processGenericStep(sessionId, 6, { pepScreening: data.pepScreening });
+    const result = await processGenericStep(sessionId, 6, { pepResponses: data.pepResponses });
 
     // 4. Calculate Risk Assessment (Controller specific logic)
+    const pepResponses = data.pepResponses || {};
     const riskAssessment = {
-        hasHighRisk: data.pepScreening.isPEPSeniorOfficial ||
-                    data.pepScreening.isPEPPoliticalParty ||
-                    data.pepScreening.isPEPFamilyMember ||
-                    data.pepScreening.isPEPCloseAssociate,
-        requiresReview: data.pepScreening.isPEPSeniorOfficial ||
-                       data.pepScreening.isPEPPoliticalParty,
+        hasHighRisk: pepResponses['pep_government'] === true ||
+                    pepResponses['pep_political'] === true ||
+                    pepResponses['pep_family'] === true ||
+                    pepResponses['pep_associate'] === true,
+        requiresReview: pepResponses['pep_government'] === true ||
+                       pepResponses['pep_political'] === true,
     };
 
     return NextResponse.json({
@@ -103,12 +104,7 @@ export async function GET(request: NextRequest) {
       sessionId,
       step: session.current_step,
       completedSteps: session.completed_steps,
-      data: session.session_data?.pepScreening || {
-        isPEPSeniorOfficial: false,
-        isPEPPoliticalParty: false,
-        isPEPFamilyMember: false,
-        isPEPCloseAssociate: false,
-      },
+      data: session.session_data?.pepResponses || {},
     });
   } catch (error) {
     console.error('Step 6 GET API error:', error);

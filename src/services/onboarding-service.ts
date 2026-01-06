@@ -214,24 +214,62 @@ export async function submitOnboarding(
         p_primary_use_case: sessionData.businessDetails?.primaryUseCase || null,
         p_business_operations: sessionData.businessOperations || null,
         p_owners: sanitizedOwners,
-        p_pep_screening: sessionData.pepScreening || null,
+        p_pep_screening: sessionData.pepResponses ? { pepResponses: sessionData.pepResponses } : null,
         p_documents: (sessionData.documents || []).map((doc: any) => {
-          // Map frontend snake_case types to DB CamelCase constraint values
-          const DOCUMENT_TYPE_DB_MAP: Record<string, string> = {
-            'personal_id': 'idCard',
-            'proof_address': 'proofOfAddress',
-            'formation_doc': 'formationDocument',
-            'proof_of_registration': 'proofOfRegistration',
-            'proof_of_ownership': 'proofOfOwnership',
-            'bank_statement': 'bankStatement',
-            'tax_id': 'taxId',
-            'msb_cert': 'msbCert',
-            'taxIdVerification': 'taxId', // Legacy fallback
-          };
+          let mappedType = doc.type;
+
+          // Map frontend document types to database-allowed types
+          switch (doc.type) {
+            case 'taxIdVerification':
+              mappedType = 'taxId';
+              break;
+            case 'driversLicense':
+              mappedType = 'driversLicenseFront'; // Use front as primary
+              break;
+            case 'selfPortrait':
+              mappedType = 'selfie';
+              break;
+            case 'financialLicense':
+              mappedType = 'registration';
+              break;
+            case 'transactionFlow':
+              mappedType = 'transactionFlowDiagram';
+              break;
+            case 'amlAudit':
+              mappedType = 'soc2Report';
+              break;
+            // These are already correctly named and allowed:
+            case 'passport':
+            case 'idCard':
+            case 'proofOfAddress':
+            case 'formationDocument':
+            case 'proofOfRegistration':
+            case 'proofOfOwnership':
+            case 'bankStatement':
+            case 'taxId':
+            case 'agreement':
+            case 'registration':
+            case 'msbCert':
+            case 'mtlLicense':
+            case 'amlPolicy':
+            case 'soc2Report':
+            case 'transactionFlowDiagram':
+            case 'owner_passport':
+            case 'owner_driversLicense':
+            case 'owner_national_id':
+            case 'owner_proof_of_address':
+            case 'owner_selfie':
+              mappedType = doc.type; // Already correct
+              break;
+            default:
+              // For unknown types, log and use a fallback
+              console.warn(`Unknown document type: ${doc.type}, using 'agreement' as fallback`);
+              mappedType = 'agreement';
+          }
 
           return {
             ...doc,
-            type: DOCUMENT_TYPE_DB_MAP[doc.type] || doc.type,
+            type: mappedType,
           };
         }),
       p_metadata: {

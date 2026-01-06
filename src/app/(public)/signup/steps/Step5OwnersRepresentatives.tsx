@@ -10,7 +10,17 @@ import {
   getStatesForCountry,
   hasStateDropdown,
   PHONE_CODE_OPTIONS,
+  OWNER_ROLES,
 } from '@/lib/constants/countries';
+import {
+  EMPLOYMENT_STATUS_OPTIONS,
+  ANNUAL_INCOME_OPTIONS,
+  SOURCE_OF_FUNDS_OPTIONS,
+  SOURCE_OF_WEALTH_OPTIONS,
+  ID_TYPE_OPTIONS,
+  EMPLOYMENT_INDUSTRY_OPTIONS,
+  ENTITY_TYPE_OPTIONS,
+} from '@/lib/constants/business';
 import { OwnershipValidationService, Owner as ServiceOwner } from '@/lib/validations/ownership-validation';
 import {
   AlertTriangle,
@@ -189,54 +199,15 @@ export function Step5OwnersRepresentatives({
   // Citizenship options (same as countries)
   const citizenshipOptions = COUNTRY_OPTIONS;
 
-  // ID Type options
-  const idTypeOptions = [
-    { value: 'passport', label: 'Passport' },
-    { value: 'drivers_license', label: "Driver's License" },
-    { value: 'national_id', label: 'National ID' },
-  ];
-
-  // Employment Status options
-  const employmentStatusOptions = [
-    { value: 'employed', label: 'Employed' },
-    { value: 'self_employed', label: 'Self Employed' },
-    { value: 'unemployed', label: 'Unemployed' },
-    { value: 'retired', label: 'Retired' },
-  ];
-
-  // Industry options
-  const industryOptions = [
-    { value: 'technology', label: 'Technology' },
-    { value: 'finance', label: 'Finance' },
-    { value: 'healthcare', label: 'Healthcare' },
-    { value: 'retail', label: 'Retail' },
-    { value: 'other', label: 'Other' },
-  ];
-
-  // Source of Wealth options
-  const sourceOfWealthOptions = [
-    { value: 'salary', label: 'Salary' },
-    { value: 'business', label: 'Business Income' },
-    { value: 'investments', label: 'Investments' },
-    { value: 'inheritance', label: 'Inheritance' },
-    { value: 'other', label: 'Other' },
-  ];
-
-  // Annual Income options
-  const annualIncomeOptions = [
-    { value: 'under_50k', label: 'Under $50,000' },
-    { value: '50k_100k', label: '$50,000 - $100,000' },
-    { value: '100k_200k', label: '$100,000 - $200,000' },
-    { value: 'over_200k', label: 'Over $200,000' },
-  ];
-
-  // Entity Type options
-  const entityTypeOptions = [
-    { value: 'llc', label: 'LLC' },
-    { value: 'corporation', label: 'Corporation' },
-    { value: 'partnership', label: 'Partnership' },
-    { value: 'trust', label: 'Trust' },
-  ];
+  // Use imported constants for all dropdown options
+  const idTypeOptions = ID_TYPE_OPTIONS;
+  const employmentStatusOptions = EMPLOYMENT_STATUS_OPTIONS;
+  const industryOptions = EMPLOYMENT_INDUSTRY_OPTIONS;
+  const sourceOfWealthOptions = SOURCE_OF_WEALTH_OPTIONS;
+  const sourceOfFundsOptions = SOURCE_OF_FUNDS_OPTIONS;
+  const annualIncomeOptions = ANNUAL_INCOME_OPTIONS;
+  const entityTypeOptions = ENTITY_TYPE_OPTIONS;
+  const roleOptions = OWNER_ROLES;
 
   const handleAddPerson = () => {
     const newOwner: Owner = {
@@ -346,9 +317,8 @@ export function Step5OwnersRepresentatives({
                 <AlertTriangle className='h-5 w-5 text-red-500' />
               )}
               <span
-                className={`font-medium ${
-                  ownershipValidation.isValid ? 'text-green-600' : 'text-red-500'
-                }`}
+                className={`font-medium ${ownershipValidation.isValid ? 'text-green-600' : 'text-red-500'
+                  }`}
               >
                 {ownershipValidation.totalPercentage}%
               </span>
@@ -358,32 +328,30 @@ export function Step5OwnersRepresentatives({
           {/* Progress Bar */}
           <div className='mb-2 h-2 w-full overflow-hidden rounded-full bg-gray-100'>
             <div
-              className={`h-full transition-all duration-300 ease-out ${
-                progressColor === 'green'
-                  ? 'bg-green-500'
-                  : progressColor === 'red'
-                    ? 'bg-red-500'
-                    : 'bg-yellow-500'
-              }`}
+              className={`h-full transition-all duration-300 ease-out ${progressColor === 'green'
+                ? 'bg-green-500'
+                : progressColor === 'red'
+                  ? 'bg-red-500'
+                  : 'bg-yellow-500'
+                }`}
               style={{ width: `${Math.min(progressPercentage, 100)}%` }}
             />
           </div>
 
           {/* Status Message */}
           <p
-            className={`text-sm ${
-              progressColor === 'green'
-                ? 'text-green-600'
-                : progressColor === 'red'
-                  ? 'text-red-600'
-                  : 'text-yellow-600'
-            }`}
+            className={`text-sm ${progressColor === 'green'
+              ? 'text-green-600'
+              : progressColor === 'red'
+                ? 'text-red-600'
+                : 'text-yellow-600'
+              }`}
           >
             {progressMessage}
           </p>
 
           {/* Validation Errors */}
-       
+
         </div>
         {/* Total Ownership Card */}
 
@@ -433,7 +401,7 @@ export function Step5OwnersRepresentatives({
                         owner.type === 'entity'
                           ? owner.entityName || `Entity Owner`
                           : `${owner.firstName || ''} ${owner.lastName || ''}`.trim() ||
-                            `Individual Owner`,
+                          `Individual Owner`,
                       type: owner.type === 'entity' ? 'Entity Owner' : 'Individual Owner',
                     });
                     setIsShareModalOpen(true);
@@ -742,12 +710,7 @@ export function Step5OwnersRepresentatives({
                         );
                         updateParent(updatedOwners);
                       }}
-                      options={[
-                        { value: 'ceo', label: 'CEO' },
-                        { value: 'cfo', label: 'CFO' },
-                        { value: 'director', label: 'Director' },
-                        { value: 'owner', label: 'Owner' },
-                      ]}
+                      options={roleOptions}
                       placeholder='Select Role'
                       error={errors[`owners.${index}.role`]}
                     />
@@ -1102,7 +1065,7 @@ export function Step5OwnersRepresentatives({
                             );
                             updateParent(updatedOwners);
                           }}
-                          options={sourceOfWealthOptions}
+                          options={sourceOfFundsOptions}
                           placeholder='Select source'
                           direction='up'
                         />
