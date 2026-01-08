@@ -6,6 +6,7 @@ import { ClientNotes } from '@/components/admin/clients/ClientNotes';
 import { ClientRepresentatives } from '@/components/admin/clients/ClientRepresentatives';
 import { ClientTransactions } from '@/components/admin/clients/ClientTransactions';
 import { ClientViewOverview } from '@/components/admin/clients/ClientViewOverview';
+import { ClientWallets } from '@/components/admin/clients/ClientWallets';
 import ActivityTab from '@/components/icons/ActivityTab';
 import NotesIcon from '@/components/icons/NotesIcon';
 import TransacionIcon from '@/components/icons/TransacionIcon';
@@ -19,14 +20,19 @@ import {
   LayoutDashboard,
   Users
 } from 'lucide-react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 export default function ClientDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const clientId = params.id as string;
-  const [activeTab, setActiveTab] = useState('overview');
+
+  // Initialize activeTab from URL params or default to 'overview'
+  const [activeTab, setActiveTab] = useState(() => {
+    return searchParams.get('tab') || 'overview';
+  });
   const [clientName, setClientName] = useState('Loading...');
 
   // Fetch client name from API
@@ -53,6 +59,22 @@ export default function ClientDetailPage() {
     fetchClientName();
   }, [fetchClientName]);
 
+  // Sync activeTab with URL params on mount and when searchParams change
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
+
+  // Handle tab change and update URL
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab);
+    // Update URL without page reload
+    const newUrl = `${window.location.pathname}?tab=${newTab}`;
+    router.push(newUrl, { scroll: false });
+  };
+
   const tabs = [
     { id: 'overview', label: 'Overview', icon: <LayoutDashboard className='h-4 w-4' /> },
     { id: 'representative', label: 'Representative', icon: <Users className='h-4 w-4' /> },
@@ -71,6 +93,8 @@ export default function ClientDetailPage() {
         return <ClientRepresentatives clientId={clientId} />;
       case 'documents':
         return <ClientDocuments clientId={clientId} />;
+      case 'wallets':
+        return <ClientWallets clientId={clientId} />;
       case 'transactions':
         return <ClientTransactions clientId={clientId} />;
       case 'notes':
@@ -104,7 +128,7 @@ export default function ClientDetailPage() {
 
       {/* Tabs Navigation */}
       <div className='bg-gray-50/80 px-2 py-1 backdrop-blur-sm'>
-        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} variant='pills' />
+        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={handleTabChange} variant='pills' />
       </div>
 
       {/* Main Content */}

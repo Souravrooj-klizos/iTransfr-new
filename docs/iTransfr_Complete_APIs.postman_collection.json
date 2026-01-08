@@ -1,0 +1,469 @@
+{
+    "info": {
+        "name": "iTransfr - Complete API Collection (Unified)",
+        "description": "The complete collection for iTransfr, including Admin Wallets, Client Wallets, KYT Integration, and External KYC (AMLBot) endpoints.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3000",
+            "type": "string",
+            "description": "Local iTransfr backend URL"
+        },
+        {
+            "key": "client_id",
+            "value": "ef211103-25d6-42ad-9735-315803af0046",
+            "type": "string"
+        },
+        {
+            "key": "wallet_id",
+            "value": "5d62d25b-91ec-496e-b58c-53a1195513ce",
+            "type": "string"
+        },
+        {
+            "key": "alert_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "amlbot_kyc_url",
+            "value": "https://kyc-api.amlbot.com",
+            "type": "string",
+            "description": "AMLBot KYC API base URL"
+        },
+        {
+            "key": "amlbot_token",
+            "value": "Token YOUR_API_KEY_HERE",
+            "type": "string"
+        },
+        {
+            "key": "applicant_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "document_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "file_id",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Admin Wallets",
+            "item": [
+                {
+                    "name": "List All Wallets",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/wallets",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "wallets"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Master Wallet",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Master Wallet\",\n  \"label\": \"Main Admin Wallet\",\n  \"network\": \"solana\",\n  \"walletType\": \"master\",\n  \"enableKytMonitoring\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/wallets",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "wallets"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Wallet Detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/wallets/{{wallet_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "wallets",
+                                "{{wallet_id}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Client Wallets",
+            "item": [
+                {
+                    "name": "List Client Wallets",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/client/{{client_id}}/wallet",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "client",
+                                "{{client_id}}",
+                                "wallet"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Wallet for Client",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"network\": \"solana\",\n  \"label\": \"Client SOL Wallet\",\n  \"isPrimary\": true,\n  \"enableKytMonitoring\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/client/{{client_id}}/wallet",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "client",
+                                "{{client_id}}",
+                                "wallet"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "KYT (Screening & Monitoring)",
+            "item": [
+                {
+                    "name": "Screen Address",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"address\": \"DRpbCBMxVnDK7maPM5tGv6MvB3v1sRMC86PZ8okm21hy\",\n  \"network\": \"solana\",\n  \"walletId\": \"{{wallet_id}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/kyt/screen",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "kyt",
+                                "screen"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Enable Monitoring",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"walletId\": \"{{wallet_id}}\",\n  \"address\": \"DRpbCBMxVnDK7maPM5tGv6MvB3v1sRMC86PZ8okm21hy\",\n  \"network\": \"solana\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/kyt/monitor",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "kyt",
+                                "monitor"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "KYT Webhook Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/kyt/webhook",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "kyt",
+                                "webhook"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "KYT Alerts (Admin)",
+            "item": [
+                {
+                    "name": "List All Alerts",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/kyt/alerts",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "kyt",
+                                "alerts"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Alert Status",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"reviewed\",\n  \"notes\": \"Verified as safe\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/kyt/alerts/{{alert_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "kyt",
+                                "alerts",
+                                "{{alert_id}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "KYC (AMLBot External APIs)",
+            "item": [
+                {
+                    "name": "Applicants",
+                    "item": [
+                        {
+                            "name": "Create Applicant",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "{{amlbot_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"type\": \"PERSON\",\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"email\": \"john@example.com\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{amlbot_kyc_url}}/applicants",
+                                    "host": [
+                                        "{{amlbot_kyc_url}}"
+                                    ],
+                                    "path": [
+                                        "applicants"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Applicant",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "{{amlbot_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{amlbot_kyc_url}}/applicants/{{applicant_id}}",
+                                    "host": [
+                                        "{{amlbot_kyc_url}}"
+                                    ],
+                                    "path": [
+                                        "applicants",
+                                        "{{applicant_id}}"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Documents & Files",
+                    "item": [
+                        {
+                            "name": "Upload File",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "{{amlbot_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "file",
+                                            "type": "file",
+                                            "src": ""
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{amlbot_kyc_url}}/files",
+                                    "host": [
+                                        "{{amlbot_kyc_url}}"
+                                    ],
+                                    "path": [
+                                        "files"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Create Document",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "{{amlbot_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"applicant_id\": \"{{applicant_id}}\",\n    \"type\": \"PASSPORT\",\n    \"front_side_id\": \"{{file_id}}\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{amlbot_kyc_url}}/documents",
+                                    "host": [
+                                        "{{amlbot_kyc_url}}"
+                                    ],
+                                    "path": [
+                                        "documents"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Verifications",
+                    "item": [
+                        {
+                            "name": "Create Verification",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "{{amlbot_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"applicant_id\": \"{{applicant_id}}\",\n    \"types\": [\"DOCUMENT\", \"AML\"]\n}"
+                                },
+                                "url": {
+                                    "raw": "{{amlbot_kyc_url}}/verifications",
+                                    "host": [
+                                        "{{amlbot_kyc_url}}"
+                                    ],
+                                    "path": [
+                                        "verifications"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

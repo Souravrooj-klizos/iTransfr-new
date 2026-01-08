@@ -45,7 +45,7 @@ export function BankDetailsField({
           {copyable && (
             <button
               onClick={handleCopy}
-              className='z-10 flex cursor-pointer items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2 py-[9px] text-xs text-gray-500 transition-colors hover:text-gray-700'
+              className='z-10 flex cursor-pointer items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2 py-[9px] text-xs text-gray-500 transition-all hover:text-gray-700 active:scale-95'
               type='button'
             >
               {copied ? (

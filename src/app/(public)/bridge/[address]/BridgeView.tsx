@@ -61,7 +61,7 @@ export default function BridgeView({ address }: { address: string }) {
         {/* Action Button */}
         <button
           onClick={handleCopy}
-          className='flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700'
+          className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-700 active:scale-95'
         >
           {copied ? (
             <>

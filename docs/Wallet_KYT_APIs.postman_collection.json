@@ -1,0 +1,886 @@
+{
+    "info": {
+        "name": "iTransfr - Wallet & KYT APIs",
+        "description": "Complete API collection for Wallet Management & KYT (Know Your Transaction) screening and monitoring",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_postman_id": "itransfr-wallet-kyt-v1",
+        "version": "1.0.0"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3000",
+            "type": "string",
+            "description": "iTransfr backend URL"
+        },
+        {
+            "key": "client_id",
+            "value": "ef211103-25d6-42ad-9735-315803af0046",
+            "type": "string",
+            "description": "Sample client UUID (replace with actual)"
+        },
+        {
+            "key": "wallet_id",
+            "value": "",
+            "type": "string",
+            "description": "Will be set after wallet creation"
+        },
+        {
+            "key": "alert_id",
+            "value": "",
+            "type": "string",
+            "description": "Will be set after fetching alerts"
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{admin_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "item": [
+        {
+            "name": "1. Wallet Management",
+            "item": [
+                {
+                    "name": "List All Wallets",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const json = pm.response.json();",
+                                    "    pm.test('Wallets returned', () => {",
+                                    "        pm.expect(json.wallets).to.be.an('array');",
+                                    "    });",
+                                    "    if (json.wallets.length > 0) {",
+                                    "        pm.environment.set('wallet_id', json.wallets[0].id);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/wallets",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "wallets"
+                            ]
+                        },
+                        "description": "Get all wallets with optional filters: ?type=master&network=solana&status=active"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Master Wallet (Solana)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const json = pm.response.json();",
+                                    "    pm.test('Wallet created', () => {",
+                                    "        pm.expect(json.success).to.be.true;",
+                                    "        pm.expect(json.wallet).to.have.property('id');",
+                                    "    });",
+                                    "    pm.environment.set('wallet_id', json.wallet.id);",
+                                    "    console.log('Created wallet:', json.wallet.address);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Master SOL Wallet\",\n  \"label\": \"Primary Solana Treasury\",\n  \"network\": \"solana\",\n  \"walletType\": \"master\",\n  \"enableKytMonitoring\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/wallets",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "wallets"
+                            ]
+                        },
+                        "description": "Creates a master wallet on Solana with automatic KYT screening"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Master Wallet (Ethereum)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Master ETH Wallet\",\n  \"label\": \"Primary Ethereum Treasury\",\n  \"network\": \"ethereum\",\n  \"walletType\": \"master\",\n  \"enableKytMonitoring\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/wallets",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "wallets"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Master Wallet (Tron)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Master TRX Wallet\",\n  \"label\": \"Primary Tron Treasury\",\n  \"network\": \"tron\",\n  \"walletType\": \"master\",\n  \"enableKytMonitoring\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/wallets",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "wallets"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Wallet Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/wallets/{{wallet_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "wallets",
+                                "{{wallet_id}}"
+                            ]
+                        },
+                        "description": "Get detailed information about a specific wallet"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Wallet",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"label\": \"Updated Label\",\n  \"status\": \"active\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/wallets/{{wallet_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "wallets",
+                                "{{wallet_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Wallet (Dual-Control)",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/wallets/{{wallet_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "wallets",
+                                "{{wallet_id}}"
+                            ]
+                        },
+                        "description": "Request wallet deletion (requires dual approval)"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Wallet creation, management, and deletion operations"
+        },
+        {
+            "name": "2. Client Wallets",
+            "item": [
+                {
+                    "name": "List Client Wallets",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/client/{{client_id}}/wallet",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "client",
+                                "{{client_id}}",
+                                "wallet"
+                            ]
+                        },
+                        "description": "Get all wallets linked to a specific client"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Client Wallet (Solana)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const json = pm.response.json();",
+                                    "    pm.environment.set('wallet_id', json.wallet.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"network\": \"solana\",\n  \"label\": \"Client SOL Wallet\",\n  \"isPrimary\": true,\n  \"enableKytMonitoring\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/client/{{client_id}}/wallet",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "client",
+                                "{{client_id}}",
+                                "wallet"
+                            ]
+                        },
+                        "description": "Create wallet for a specific client with automatic KYT"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Client Wallet (Ethereum)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"network\": \"ethereum\",\n  \"label\": \"Client ETH Wallet\",\n  \"isPrimary\": false,\n  \"enableKytMonitoring\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/client/{{client_id}}/wallet",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "client",
+                                "{{client_id}}",
+                                "wallet"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Client-specific wallet operations"
+        },
+        {
+            "name": "3. KYT Screening",
+            "item": [
+                {
+                    "name": "Screen Address (Solana)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const json = pm.response.json();",
+                                    "    pm.test('Risk score returned', () => {",
+                                    "        pm.expect(json).to.have.property('riskScore');",
+                                    "        pm.expect(json).to.have.property('severity');",
+                                    "    });",
+                                    "    console.log('Risk Score:', json.riskScore);",
+                                    "    console.log('Severity:', json.severity);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"address\": \"DRpbCBMxVnDK7maPM5tGv6MvB3v1sRMC86PZ8okm21hy\",\n  \"network\": \"solana\",\n  \"walletId\": \"{{wallet_id}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/kyt/screen",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "kyt",
+                                "screen"
+                            ]
+                        },
+                        "description": "One-time AML screening of a Solana address"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Screen Address (Ethereum)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"address\": \"0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb\",\n  \"network\": \"ethereum\",\n  \"walletId\": \"{{wallet_id}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/kyt/screen",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "kyt",
+                                "screen"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Screen Address (Tron)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Risk score is returned\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.riskScore).to.not.be.undefined;",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"address\": \"TGzz8gjYiYRqpfmDwnLxfgPuLVNmpCswVp\",\n  \"network\": \"tron\",\n  \"walletId\": \"{{wallet_id}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/kyt/screen",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "kyt",
+                                "screen"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ],
+            "description": "One-time address screening for AML risk"
+        },
+        {
+            "name": "4. KYT Monitoring",
+            "item": [
+                {
+                    "name": "Enable Monitoring",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"walletId\": \"{{wallet_id}}\",\n  \"address\": \"DRpbCBMxVnDK7maPM5tGv6MvB3v1sRMC86PZ8okm21hy\",\n  \"network\": \"solana\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/kyt/monitor",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "kyt",
+                                "monitor"
+                            ]
+                        },
+                        "description": "Subscribe wallet to continuous AML monitoring"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Disable Monitoring",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/kyt/monitor?walletId={{wallet_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "kyt",
+                                "monitor"
+                            ],
+                            "query": [
+                                {
+                                    "key": "walletId",
+                                    "value": "{{wallet_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Unsubscribe wallet from monitoring"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Continuous monitoring management"
+        },
+        {
+            "name": "5. KYT Alerts",
+            "item": [
+                {
+                    "name": "List All Alerts",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const json = pm.response.json();",
+                                    "    if (json.alerts.length > 0) {",
+                                    "        pm.environment.set('alert_id', json.alerts[0].id);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/kyt/alerts?status=unread&limit=50",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "kyt",
+                                "alerts"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "unread",
+                                    "description": "Filter by status: unread, reviewed, resolved, dismissed"
+                                },
+                                {
+                                    "key": "severity",
+                                    "value": "high",
+                                    "disabled": true,
+                                    "description": "Filter by severity: low, medium, high, critical"
+                                },
+                                {
+                                    "key": "walletId",
+                                    "value": "{{wallet_id}}",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "50"
+                                },
+                                {
+                                    "key": "offset",
+                                    "value": "0",
+                                    "disabled": true
+                                }
+                            ]
+                        },
+                        "description": "Get paginated list of AML alerts with filters"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Alert Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/kyt/alerts/{{alert_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "kyt",
+                                "alerts",
+                                "{{alert_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Mark Alert as Reviewed",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"reviewed\",\n  \"notes\": \"Address verified as belonging to legitimate exchange\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/kyt/alerts/{{alert_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "kyt",
+                                "alerts",
+                                "{{alert_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Resolve Alert",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"resolved\",\n  \"notes\": \"Funds returned to sender. No further action needed.\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/kyt/alerts/{{alert_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "kyt",
+                                "alerts",
+                                "{{alert_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Dismiss Alert",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"dismissed\",\n  \"notes\": \"False positive - wallet whitelisted\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/kyt/alerts/{{alert_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "kyt",
+                                "alerts",
+                                "{{alert_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Alert management and review"
+        },
+        {
+            "name": "6. KYT Webhook",
+            "item": [
+                {
+                    "name": "Webhook Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/kyt/webhook",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "kyt",
+                                "webhook"
+                            ]
+                        },
+                        "description": "Verify webhook endpoint is reachable"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Simulate Webhook (Testing Only)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-amlbot-signature",
+                                "value": "test-signature",
+                                "description": "AMLBot webhook signature"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"event\": \"risk_score_updated\",\n  \"uid\": \"test-uid-123\",\n  \"address\": \"DRpbCBMxVnDK7maPM5tGv6MvB3v1sRMC86PZ8okm21hy\",\n  \"network\": \"SOL\",\n  \"risk_score\": 45.5,\n  \"timestamp\": \"2026-01-08T10:00:00Z\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/kyt/webhook",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "kyt",
+                                "webhook"
+                            ]
+                        },
+                        "description": "⚠️ FOR TESTING ONLY - Simulates AMLBot webhook payload"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Webhook testing and verification"
+        },
+        {
+            "name": "7. Turnkey Integration",
+            "item": [
+                {
+                    "name": "Test Turnkey Connection",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/turnkey/test",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "turnkey",
+                                "test"
+                            ]
+                        },
+                        "description": "Verify Turnkey API credentials and connectivity"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Turnkey Wallet (Direct)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Direct Test Wallet\",\n  \"network\": \"solana\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/turnkey/wallet",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "turnkey",
+                                "wallet"
+                            ]
+                        },
+                        "description": "Direct Turnkey API call (for testing)"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Direct Turnkey integration tests"
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Auto-generate timestamp for requests",
+                    "pm.variables.set('timestamp', new Date().toISOString());"
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Global test: Check response time",
+                    "pm.test('Response time < 5s', () => {",
+                    "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                    "});"
+                ]
+            }
+        }
+    ]
+}

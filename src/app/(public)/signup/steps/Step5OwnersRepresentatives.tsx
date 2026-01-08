@@ -6,33 +6,33 @@ import { Modal } from '@/components/ui/Modal';
 import { Select } from '@/components/ui/Select';
 import { useToast } from '@/components/ui/Toast';
 import {
-  COUNTRY_OPTIONS,
-  getStatesForCountry,
-  hasStateDropdown,
-  PHONE_CODE_OPTIONS,
-  OWNER_ROLES,
-} from '@/lib/constants/countries';
-import {
-  EMPLOYMENT_STATUS_OPTIONS,
-  ANNUAL_INCOME_OPTIONS,
-  SOURCE_OF_FUNDS_OPTIONS,
-  SOURCE_OF_WEALTH_OPTIONS,
-  ID_TYPE_OPTIONS,
-  EMPLOYMENT_INDUSTRY_OPTIONS,
-  ENTITY_TYPE_OPTIONS,
+    ANNUAL_INCOME_OPTIONS,
+    EMPLOYMENT_INDUSTRY_OPTIONS,
+    EMPLOYMENT_STATUS_OPTIONS,
+    ENTITY_TYPE_OPTIONS,
+    ID_TYPE_OPTIONS,
+    SOURCE_OF_FUNDS_OPTIONS,
+    SOURCE_OF_WEALTH_OPTIONS,
 } from '@/lib/constants/business';
+import {
+    COUNTRY_OPTIONS,
+    getStatesForCountry,
+    hasStateDropdown,
+    OWNER_ROLES,
+    PHONE_CODE_OPTIONS,
+} from '@/lib/constants/countries';
 import { OwnershipValidationService, Owner as ServiceOwner } from '@/lib/validations/ownership-validation';
 import {
-  AlertTriangle,
-  Building2,
-  Check,
-  CheckCircle,
-  Copy,
-  Mail,
-  Plus,
-  Share,
-  Trash2,
-  User,
+    AlertTriangle,
+    Building2,
+    Check,
+    CheckCircle,
+    Copy,
+    Mail,
+    Plus,
+    Share,
+    Trash2,
+    User,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -1160,7 +1160,7 @@ export function Step5OwnersRepresentatives({
               </span>
               <button
                 onClick={handleCopyUrl}
-                className='flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1 text-sm font-normal text-gray-700 shadow-sm transition-colors hover:bg-gray-50'
+                className='flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1 text-sm font-normal text-gray-700 shadow-sm transition-all hover:bg-gray-50 active:scale-95'
               >
                 {copiedUrl ? (
                   <>

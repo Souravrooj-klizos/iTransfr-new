@@ -407,7 +407,37 @@ export async function submitOnboarding(
   }
 
 
-  // 5. Final Audit Log
+  // 5. Create Wallets (Solana, Ethereum, Tron)
+  try {
+    const { createClientWallet } = await import('@/services/wallet-service');
+
+    console.log('[Onboarding] Creating default wallets for client:', clientId);
+
+    // create wallets in parallel
+    const networks = ['solana', 'ethereum', 'tron'];
+    const walletPromises = networks.map(network =>
+      createClientWallet({
+        clientId,
+        network,
+        label: `${sessionData.businessInfo?.businessName || 'Client'} ${network.charAt(0).toUpperCase() + network.slice(1)} Wallet`,
+        isPrimary: network === 'solana', // Default Solana as primary for now
+        enableKytMonitoring: true
+      }).catch(err => {
+        console.error(`[Onboarding] Failed to create ${network} wallet:`, err);
+        return null;
+      })
+    );
+
+    await Promise.all(walletPromises);
+    console.log('[Onboarding] Default wallets creation process completed');
+
+  } catch (walletError) {
+    console.error('[Onboarding] Wallet creation error:', walletError);
+    // Non-blocking
+  }
+
+
+  // 6. Final Audit Log
   await supabase.from('audit_log').insert({
     adminId: submitterId,
     action: 'client_created_final',

@@ -115,23 +115,23 @@ export const normalizeCountryCode = (code: string | undefined): string => {
   if (!code) return 'US';
   const uppercased = code.toUpperCase();
   const countryMapping: Record<string, string> = {
-    UK: 'GB',
-    EN: 'GB',
-    ENGLAND: 'GB',
-    BRITAIN: 'GB',
+    'UK': 'GB',
+    'EN': 'GB',
+    'ENGLAND': 'GB',
+    'BRITAIN': 'GB',
     'UNITED KINGDOM': 'GB',
-    USA: 'US',
+    'USA': 'US',
     'UNITED STATES': 'US',
-    CANADA: 'CA',
-    GERMANY: 'DE',
-    SPAIN: 'ES',
+    'CANADA': 'CA',
+    'GERMANY': 'DE',
+    'SPAIN': 'ES',
     'HONG KONG': 'HK',
-    SINGAPORE: 'SG',
-    UAE: 'AE',
-    BRAZIL: 'BR',
-    MEXICO: 'MX',
-    COLOMBIA: 'CO',
-    INDIA: 'IN',
+    'SINGAPORE': 'SG',
+    'UAE': 'AE',
+    'BRAZIL': 'BR',
+    'MEXICO': 'MX',
+    'COLOMBIA': 'CO',
+    'INDIA': 'IN',
   };
   return countryMapping[uppercased] || uppercased;
 };
@@ -149,9 +149,9 @@ export const sanitizePhoneNumber = (phone: string | undefined): string => {
  */
 export const mapOwnerRole = (role: string | undefined): string => {
   const roleMapping: Record<string, string> = {
-    ceo: 'officer',
-    cfo: 'officer',
-    owner: 'shareholder',
+    'ceo': 'officer',
+    'cfo': 'officer',
+    'owner': 'shareholder',
   };
   return roleMapping[role || ''] || role || 'other';
 };
@@ -253,18 +253,15 @@ const transformStep5Data = (formData: ClientFormData) => {
         lastName: owner.lastName,
         email: owner.email,
         // Extract actual phone code from format "US:+1" or use directly if already just "+1"
-        phone:
-          (owner.phoneCountryCode?.includes(':')
-            ? owner.phoneCountryCode.split(':')[1]
-            : owner.phoneCountryCode || '+1') + (owner.phone || '').replace(/[\s\(\)\-]/g, ''),
+        phone: (owner.phoneCountryCode?.includes(':')
+          ? owner.phoneCountryCode.split(':')[1]
+          : (owner.phoneCountryCode || '+1')) + (owner.phone || '').replace(/[\s\(\)\-]/g, ''),
         phoneCountryCode: owner.phoneCountryCode?.includes(':')
           ? owner.phoneCountryCode.split(':')[1]
-          : owner.phoneCountryCode || '+1',
+          : (owner.phoneCountryCode || '+1'),
         dateOfBirth: owner.dob,
         citizenship: normalizeCountryCode(owner.citizenship),
-        secondaryCitizenship: owner.secondaryCitizenship
-          ? normalizeCountryCode(owner.secondaryCitizenship)
-          : undefined,
+        secondaryCitizenship: owner.secondaryCitizenship ? normalizeCountryCode(owner.secondaryCitizenship) : undefined,
         taxId: owner.taxId,
         role: mapOwnerRole(owner.role),
         ownershipPercentage: Math.min(parseFloat(owner.percentage) || 0, 100),
@@ -294,9 +291,9 @@ const transformStep5Data = (formData: ClientFormData) => {
   return { owners: mappedOwners };
 };
 
-const transformStep6Data = (formData: ClientFormData) => ({
-  pepResponses: formData.pepResponses,
-});
+  const transformStep6Data = (formData: ClientFormData) => ({
+    pepResponses: formData.pepResponses,
+  });
 
 const transformStep7Data = (formData: ClientFormData) => ({
   documents: formData.documents || [],
@@ -353,7 +350,7 @@ const transformStep4ApiToForm = (apiData: any): Partial<ClientFormData> => ({
 
 const transformStep5ApiToForm = (apiData: any): Partial<ClientFormData> => {
   // API returns owners array directly (not wrapped in .owners)
-  const ownersArray = Array.isArray(apiData) ? apiData : apiData.owners || apiData.data || [];
+  const ownersArray = Array.isArray(apiData) ? apiData : (apiData.owners || apiData.data || []);
 
   // Map API field names to form field names
   const mappedOwners = ownersArray.map((owner: any, index: number) => {
@@ -385,10 +382,9 @@ const transformStep5ApiToForm = (apiData: any): Partial<ClientFormData> => {
           ? `${owner.residentialCountry || 'US'}:${owner.phoneCountryCode}`
           : 'US:+1',
         // Extract phone number by removing the country code prefix
-        phone:
-          owner.phone && owner.phoneCountryCode
-            ? owner.phone.replace(owner.phoneCountryCode, '')
-            : owner.phone || '',
+        phone: owner.phone && owner.phoneCountryCode
+          ? owner.phone.replace(owner.phoneCountryCode, '')
+          : owner.phone || '',
         dob: owner.dateOfBirth || '',
         citizenship: owner.citizenship?.toUpperCase() || '',
         secondaryCitizenship: owner.secondaryCitizenship?.toUpperCase() || '',
@@ -429,7 +425,7 @@ const transformStep6ApiToForm = (apiData: any): Partial<ClientFormData> => {
 };
 
 const transformStep7ApiToForm = (apiData: any): Partial<ClientFormData> => ({
-  documents: Array.isArray(apiData) ? apiData : apiData.documents || [],
+  documents: Array.isArray(apiData) ? apiData : (apiData.documents || []),
 });
 
 // Map step number to transformer function
@@ -450,19 +446,11 @@ const getApiToFormTransformer = (step: number) => {
 // Main Hook
 // ============================================
 
-export function useClientOnboarding(
-  options: UseClientOnboardingOptions
-): UseClientOnboardingReturn {
+export function useClientOnboarding(options: UseClientOnboardingOptions): UseClientOnboardingReturn {
   const { mode, storageKey, onSessionCreated, onStepSaved, onComplete } = options;
 
   const toast = useToast();
-  const {
-    errors: validationErrors,
-    validateForm,
-    clearAllErrors,
-    clearError,
-    setFieldError,
-  } = useFormValidation();
+  const { errors: validationErrors, validateForm, clearAllErrors, clearError, setFieldError } = useFormValidation();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -481,68 +469,65 @@ export function useClientOnboarding(
   }, [sessionId, storageKey]);
 
   // Update a single form field
-  const updateFormData = useCallback(
-    (field: string, value: any) => {
-      // Handle Step 5 owners array - only clear specific field errors that changed
-      if (field === 'owners' && Array.isArray(value)) {
-        // Get previous owners from current formData state
-        const prevOwners = formData.owners || [];
-        const newOwners = value;
+  const updateFormData = useCallback((field: string, value: any) => {
+    // Handle Step 5 owners array - only clear specific field errors that changed
+    if (field === 'owners' && Array.isArray(value)) {
+      // Get previous owners from current formData state
+      const prevOwners = formData.owners || [];
+      const newOwners = value;
 
-        // Find which owner and which field changed
-        for (let i = 0; i < Math.max(prevOwners.length, newOwners.length); i++) {
-          const prevOwner = prevOwners[i] || {};
-          const newOwner = newOwners[i] || {};
+      // Find which owner and which field changed
+      for (let i = 0; i < Math.max(prevOwners.length, newOwners.length); i++) {
+        const prevOwner = prevOwners[i] || {};
+        const newOwner = newOwners[i] || {};
 
-          // Check each field in the owner
-          const allFields = new Set([...Object.keys(prevOwner), ...Object.keys(newOwner)]);
-          allFields.forEach(fieldName => {
-            if (prevOwner[fieldName] !== newOwner[fieldName]) {
-              // This field changed - map form field to validation field
-              const fieldMappings: Record<string, string> = {
-                percentage: 'ownershipPercentage',
-                dob: 'dateOfBirth',
-                authorizedSigner: 'isAuthorizedSigner',
-              };
-              const validationField = fieldMappings[fieldName] || fieldName;
-              clearError(`owners.${i}.${validationField}`);
-            }
-          });
-        }
+        // Check each field in the owner
+        const allFields = new Set([...Object.keys(prevOwner), ...Object.keys(newOwner)]);
+        allFields.forEach(fieldName => {
+          if (prevOwner[fieldName] !== newOwner[fieldName]) {
+            // This field changed - map form field to validation field
+            const fieldMappings: Record<string, string> = {
+              'percentage': 'ownershipPercentage',
+              'dob': 'dateOfBirth',
+              'authorizedSigner': 'isAuthorizedSigner',
+            };
+            const validationField = fieldMappings[fieldName] || fieldName;
+            clearError(`owners.${i}.${validationField}`);
+          }
+        });
       }
+    }
 
-      // Update the form data
-      setFormData(prev => ({ ...prev, [field]: value }));
+    // Update the form data
+    setFormData(prev => ({ ...prev, [field]: value }));
 
-      // Clear error for this field (for non-owners fields)
-      if (field !== 'owners') {
-        clearError(field);
-      }
+    // Clear error for this field (for non-owners fields)
+    if (field !== 'owners') {
+      clearError(field);
+    }
 
-      // Handle mappings for nested fields (specifically for Step 2)
-      const addressFields: Record<string, string> = {
-        address: 'address.streetAddress',
-        apt: 'address.addressLine2',
-        city: 'address.city',
-        postalCode: 'address.postalCode',
-        state: 'address.state', // In case validation error comes from address object
-      };
+    // Handle mappings for nested fields (specifically for Step 2)
+    const addressFields: Record<string, string> = {
+      'address': 'address.streetAddress',
+      'apt': 'address.addressLine2',
+      'city': 'address.city',
+      'postalCode': 'address.postalCode',
+      'state': 'address.state' // In case validation error comes from address object
+    };
 
-      // Handle mappings for Step 4 fields (form field -> validation field)
-      // Handle mappings for Step 4 fields (form field -> validation field)
-      // No mapping needed as form fields match schema keys now
-      const step4Fields: Record<string, string> = {};
+    // Handle mappings for Step 4 fields (form field -> validation field)
+    // Handle mappings for Step 4 fields (form field -> validation field)
+    // No mapping needed as form fields match schema keys now
+    const step4Fields: Record<string, string> = {};
 
-      if (addressFields[field]) {
-        clearError(addressFields[field]);
-      }
+    if (addressFields[field]) {
+      clearError(addressFields[field]);
+    }
 
-      if (step4Fields[field]) {
-        clearError(step4Fields[field]);
-      }
-    },
-    [clearError, formData.owners]
-  );
+    if (step4Fields[field]) {
+      clearError(step4Fields[field]);
+    }
+  }, [clearError, formData.owners]);
 
   // Reset the entire onboarding flow
   const resetOnboarding = useCallback(() => {
@@ -752,6 +737,7 @@ export function useClientOnboarding(
 
       onStepSaved?.(currentStep);
       return true;
+
     } catch (error) {
       console.error('Error saving step:', error);
       toast.error('Error', getErrorMessage(error));
@@ -759,18 +745,7 @@ export function useClientOnboarding(
     } finally {
       setIsSubmitting(false);
     }
-  }, [
-    currentStep,
-    formData,
-    sessionId,
-    mode,
-    toast,
-    validateForm,
-    clearAllErrors,
-    onSessionCreated,
-    onStepSaved,
-    onComplete,
-  ]);
+  }, [currentStep, formData, sessionId, mode, toast, validateForm, clearAllErrors, onSessionCreated, onStepSaved, onComplete]);
 
   // Save current step and move to next
   const goToNextStep = useCallback(async () => {
@@ -781,109 +756,103 @@ export function useClientOnboarding(
   }, [saveCurrentStep, currentStep]);
 
   // Load data for a specific step
-  const loadStepData = useCallback(
-    async (step: number) => {
-      if (!sessionId || step < 1 || step > 7) return;
+  const loadStepData = useCallback(async (step: number) => {
+    if (!sessionId || step < 1 || step > 7) return;
 
-      setIsLoadingStepData(true);
-      try {
-        const api = mode === 'admin' ? adminClientApi : adminClientApi;
+    setIsLoadingStepData(true);
+    try {
+      const api = mode === 'admin' ? adminClientApi : adminClientApi;
 
-        // Call the appropriate GET API
-        let response;
-        switch (step) {
-          case 1:
-            response = await api.getStep1(sessionId);
-            break;
-          case 2:
-            response = await api.getStep2(sessionId);
-            break;
-          case 3:
-            response = await api.getStep3(sessionId);
-            break;
-          case 4:
-            response = await api.getStep4(sessionId);
-            break;
-          case 5:
-            response = await api.getStep5(sessionId);
-            break;
-          case 6:
-            response = await api.getStep6(sessionId);
-            break;
-          case 7:
-            response = await api.getStep7(sessionId);
-            break;
-          default:
-            return;
-        }
-
-        // Transform API data to form format
-        if (response.data) {
-          const transformer = getApiToFormTransformer(step);
-          if (transformer) {
-            const transformedData = transformer(response.data);
-            setFormData(prev => ({ ...prev, ...transformedData }));
-            console.log(`✅ Loaded Step ${step} data:`, transformedData);
-          }
-        }
-      } catch (error) {
-        console.error(`Error loading step ${step} data:`, error);
-        toast.error('Error', `Failed to load step ${step} data`);
-      } finally {
-        setIsLoadingStepData(false);
+      // Call the appropriate GET API
+      let response;
+      switch (step) {
+        case 1:
+          response = await api.getStep1(sessionId);
+          break;
+        case 2:
+          response = await api.getStep2(sessionId);
+          break;
+        case 3:
+          response = await api.getStep3(sessionId);
+          break;
+        case 4:
+          response = await api.getStep4(sessionId);
+          break;
+        case 5:
+          response = await api.getStep5(sessionId);
+          break;
+        case 6:
+          response = await api.getStep6(sessionId);
+          break;
+        case 7:
+          response = await api.getStep7(sessionId);
+          break;
+        default:
+          return;
       }
-    },
-    [sessionId, mode, toast]
-  );
+
+      // Transform API data to form format
+      if (response.data) {
+        const transformer = getApiToFormTransformer(step);
+        if (transformer) {
+          const transformedData = transformer(response.data);
+          setFormData(prev => ({ ...prev, ...transformedData }));
+          console.log(`✅ Loaded Step ${step} data:`, transformedData);
+        }
+      }
+    } catch (error) {
+      console.error(`Error loading step ${step} data:`, error);
+      toast.error('Error', `Failed to load step ${step} data`);
+    } finally {
+      setIsLoadingStepData(false);
+    }
+  }, [sessionId, mode, toast]);
 
   // Resume session from a saved session ID
-  const resumeSession = useCallback(
-    async (savedSessionId: string) => {
-      setIsLoadingSession(true);
-      try {
-        const api = mode === 'admin' ? adminClientApi : adminClientApi;
+  const resumeSession = useCallback(async (savedSessionId: string) => {
+    setIsLoadingSession(true);
+    try {
+      const api = mode === 'admin' ? adminClientApi : adminClientApi;
 
-        // Get Step 1 to check session status and get progress
-        const response = await api.getStep1(savedSessionId);
+      // Get Step 1 to check session status and get progress
+      const response = await api.getStep1(savedSessionId);
 
-        if (!response.success) {
-          throw new Error('Invalid session');
-        }
-
-        setSessionId(savedSessionId);
-        onSessionCreated?.(savedSessionId);
-
-        // Determine which step to resume from
-        const completedSteps = response.completedSteps || [];
-        const nextStep = Math.max(...completedSteps, 0) + 1;
-
-        console.log(`📋 Resuming session: ${savedSessionId}`);
-        console.log(`✅ Completed steps: ${completedSteps.join(', ')}`);
-        console.log(`➡️  Resuming from step: ${nextStep}`);
-
-        // Load data for all completed steps
-        for (const step of completedSteps) {
-          if (step >= 1 && step <= 7) {
-            await loadStepData(step);
-          }
-        }
-
-        // Set current step to the next incomplete step
-        setCurrentStep(Math.min(nextStep, 8));
-
-        toast.success('Session Resumed', `Continuing from Step ${nextStep}`);
-      } catch (error) {
-        console.error('Error resuming session:', error);
-        toast.error('Error', 'Failed to resume session. Starting fresh.');
-        // Clear invalid session
-        localStorage.removeItem('onboarding_session_id');
-        setSessionId(null);
-      } finally {
-        setIsLoadingSession(false);
+      if (!response.success) {
+        throw new Error('Invalid session');
       }
-    },
-    [mode, toast, loadStepData, onSessionCreated]
-  );
+
+      setSessionId(savedSessionId);
+      onSessionCreated?.(savedSessionId);
+
+      // Determine which step to resume from
+      const completedSteps = response.completedSteps || [];
+      const nextStep = Math.max(...completedSteps, 0) + 1;
+
+      console.log(`📋 Resuming session: ${savedSessionId}`);
+      console.log(`✅ Completed steps: ${completedSteps.join(', ')}`);
+      console.log(`➡️  Resuming from step: ${nextStep}`);
+
+      // Load data for all completed steps
+      for (const step of completedSteps) {
+        if (step >= 1 && step <= 7) {
+          await loadStepData(step);
+        }
+      }
+
+      // Set current step to the next incomplete step
+      setCurrentStep(Math.min(nextStep, 8));
+
+      toast.success('Session Resumed', `Continuing from Step ${nextStep}`);
+    } catch (error) {
+      console.error('Error resuming session:', error);
+      toast.error('Error', 'Failed to resume session. Starting fresh.');
+      // Clear invalid session
+      localStorage.removeItem('onboarding_session_id');
+      setSessionId(null);
+    } finally {
+      setIsLoadingSession(false);
+    }
+  }, [mode, toast, loadStepData, onSessionCreated]);
 
   return {
     // State

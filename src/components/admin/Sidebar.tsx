@@ -4,7 +4,9 @@ import ItransfrLogo from '@/components/icons/ItransfrLogo';
 import ItransfrText from '@/components/icons/ItransfrText';
 import kycReviewIcon from '@/components/icons/kycReviewIcon';
 import RecipientsIcon from '@/components/icons/RecipientsIcon';
+import ShieldAlertIcon from '@/components/icons/ShieldAlertIcon';
 import TransacionIcon from '@/components/icons/TransacionIcon';
+import WalletIcon from '@/components/icons/WalletIcon';
 import { createClient } from '@/lib/supabase/client';
 import { useSidebar } from '@/providers/SidebarProvider';
 import { ChevronDown, CreditCard, LogOut, Settings, X } from 'lucide-react';
@@ -78,6 +80,8 @@ export function Sidebar() {
   const navigation = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: DashboardIcon },
     { name: 'Clients', href: '/admin/clients', icon: RecipientsIcon },
+    { name: 'Wallets', href: '/admin/wallets', icon: WalletIcon },
+    { name: 'KYT Alerts', href: '/admin/kyt/alerts', icon: ShieldAlertIcon },
     { name: 'KYC Review', href: '/admin/kyc-review', icon: kycReviewIcon },
     { name: 'Transactions', href: '/admin/transactions', icon: TransacionIcon },
     { name: 'Payouts', href: '/admin/payouts', icon: CreditCard },
@@ -108,15 +112,13 @@ export function Sidebar() {
 
       <div className={sidebarClasses}>
         <div
-          className={`my-3 mr-1 ml-2 flex grow flex-col rounded-lg border-2 border-r border-gray-200 bg-white lg:ml-5 ${
-            isEffectiveCollapsed ? 'items-center px-1' : ''
-          }`}
+          className={`my-3 mr-1 ml-2 flex grow flex-col rounded-lg border-2 border-r border-gray-200 bg-white lg:ml-5 ${isEffectiveCollapsed ? 'items-center px-1' : ''
+            }`}
         >
           {/* Logo */}
           <div
-            className={`flex h-16 items-center border-b border-gray-200 ${
-              isEffectiveCollapsed ? 'justify-center px-0' : 'justify-between px-4'
-            }`}
+            className={`flex h-16 items-center border-b border-gray-200 ${isEffectiveCollapsed ? 'justify-center px-0' : 'justify-between px-4'
+              }`}
           >
             <div className='flex items-center gap-2'>
               <ItransfrLogo />
@@ -134,9 +136,8 @@ export function Sidebar() {
           >
             <Link href='#' onClick={closeMobileSidebar}>
               <div
-                className={`flex cursor-pointer items-center rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100 ${
-                  isEffectiveCollapsed ? 'justify-center' : 'justify-between'
-                }`}
+                className={`flex cursor-pointer items-center rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100 ${isEffectiveCollapsed ? 'justify-center' : 'justify-between'
+                  }`}
               >
                 <div className='flex items-center gap-3'>
                   <div className='bg-gradient-dark flex h-8 w-8 shrink-0 items-center justify-center rounded-full'>
@@ -151,7 +152,7 @@ export function Sidebar() {
                       <p className='truncate text-sm font-medium text-gray-900'>
                         {pathname.startsWith('/admin/')
                           ? `${user?.first_name || 'Admin'} ${user?.last_name || ''}`.trim() ||
-                            'Administrator'
+                          'Administrator'
                           : 'Liberty Trading Inc.'}
                       </p>
                       <p className='truncate text-xs text-gray-500'>
@@ -177,14 +178,12 @@ export function Sidebar() {
                   href={item.href}
                   onClick={closeMobileSidebar}
                   title={isEffectiveCollapsed ? item.name : ''}
-                  className={`group flex items-center rounded-lg py-2.5 text-sm font-medium transition-colors ${
-                    isActive ? 'bg-gradient-dark text-white' : 'text-gray-700 hover:bg-gray-100'
-                  } ${isEffectiveCollapsed ? 'justify-center px-[10px]' : 'px-3'}`}
+                  className={`group flex items-center rounded-lg py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-gradient-dark text-white' : 'text-gray-700 hover:bg-gray-100'
+                    } ${isEffectiveCollapsed ? 'justify-center px-[10px]' : 'px-3'}`}
                 >
                   <item.icon
-                    className={`h-5 w-5 shrink-0 ${
-                      isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-600'
-                    } ${!isEffectiveCollapsed ? 'mr-3' : ''}`}
+                    className={`h-5 w-5 shrink-0 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-600'
+                      } ${!isEffectiveCollapsed ? 'mr-3' : ''}`}
                   />
                   {!isEffectiveCollapsed && item.name}
                 </Link>
@@ -202,14 +201,12 @@ export function Sidebar() {
                   href={item.href}
                   onClick={closeMobileSidebar}
                   title={isEffectiveCollapsed ? item.name : ''}
-                  className={`group flex items-center rounded-lg py-2.5 text-sm font-medium transition-colors ${
-                    isActive ? 'bg-gradient-dark text-white' : 'text-gray-700 hover:bg-gray-100'
-                  } ${isEffectiveCollapsed ? 'justify-center px-[10px]' : 'px-3'}`}
+                  className={`group flex items-center rounded-lg py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-gradient-dark text-white' : 'text-gray-700 hover:bg-gray-100'
+                    } ${isEffectiveCollapsed ? 'justify-center px-[10px]' : 'px-3'}`}
                 >
                   <item.icon
-                    className={`h-5 w-5 shrink-0 ${
-                      isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-600'
-                    } ${!isEffectiveCollapsed ? 'mr-3' : ''}`}
+                    className={`h-5 w-5 shrink-0 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-600'
+                      } ${!isEffectiveCollapsed ? 'mr-3' : ''}`}
                   />
                   {!isEffectiveCollapsed && item.name}
                 </Link>
@@ -220,9 +217,8 @@ export function Sidebar() {
             <button
               onClick={handleLogout}
               title={isEffectiveCollapsed ? 'Logout' : ''}
-              className={`group flex w-full cursor-pointer items-center rounded-lg py-2.5 text-sm font-medium text-red-500 transition-colors group-hover:text-red-600 hover:bg-red-50 ${
-                isEffectiveCollapsed ? 'justify-center px-[10px]' : 'px-3'
-              }`}
+              className={`group flex w-full cursor-pointer items-center rounded-lg py-2.5 text-sm font-medium text-red-500 transition-colors group-hover:text-red-600 hover:bg-red-50 ${isEffectiveCollapsed ? 'justify-center px-[10px]' : 'px-3'
+                }`}
             >
               <LogOut
                 className={`h-5 w-5 shrink-0 text-red-500 ${!isEffectiveCollapsed ? 'mr-3' : ''}`}
